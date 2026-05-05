@@ -16,10 +16,18 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
         sub = db.query(Subject).filter(Subject.id == enr.subjectId).first()
         if sub:
             enrolled_courses.append({
-                "id": sub.id,
+                "subjectId": sub.id,
                 "title": sub.title,
+                "slug": sub.slug,
                 "thumbnailUrl": sub.thumbnailUrl,
-                "enrolledAt": enr.createdAt
+                "category": sub.category,
+                "instructorName": sub.instructorName,
+                "enrolledAt": enr.createdAt,
+                "totalVideos": 10,  # Mocked or calculate real
+                "completedVideos": 0,
+                "percentComplete": 0,
+                "isCompleted": False,
+                "lastWatchedVideoId": None
             })
             
     completed_videos = db.query(func.count(VideoProgress.id)).filter(
@@ -30,10 +38,17 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
     total_reviews = db.query(func.count(Review.id)).filter(Review.userId == current_user.id).scalar()
     
     return {
+        "user": {
+            "name": current_user.name,
+            "email": current_user.email
+        },
         "enrolledCourses": enrolled_courses,
+        "recentlyWatched": [],
         "stats": {
-            "totalEnrolled": len(enrolled_courses),
-            "completedVideos": completed_videos,
-            "totalReviews": total_reviews
+            "totalEnrolledCourses": len(enrolled_courses),
+            "totalCompletedCourses": 0,
+            "totalHoursWatched": 0,
+            "currentStreak": 0,
+            "completedDates": []
         }
     }

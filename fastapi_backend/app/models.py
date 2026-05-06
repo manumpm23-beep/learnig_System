@@ -10,7 +10,7 @@ def generate_uuid():
 class User(Base):
     __tablename__ = "User"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
     email = Column(String(191), unique=True, nullable=False)
     password_hash = Column(String(191), nullable=False)
     name = Column(String(191), nullable=False)
@@ -40,7 +40,7 @@ class User(Base):
 class Subject(Base):
     __tablename__ = "Subject"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
     title = Column(String(191), nullable=False)
     slug = Column(String(191), unique=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -63,8 +63,8 @@ class Subject(Base):
 class Section(Base):
     __tablename__ = "Section"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    subjectId = Column(String(191), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(191), nullable=False)
     orderIndex = Column(Integer, nullable=False)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -78,8 +78,8 @@ class Section(Base):
 class Video(Base):
     __tablename__ = "Video"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    sectionId = Column(String(36), ForeignKey("Section.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    sectionId = Column(String(191), ForeignKey("Section.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(191), nullable=False)
     description = Column(Text, nullable=True)
     youtubeUrl = Column(String(191), nullable=False)
@@ -97,9 +97,9 @@ class Video(Base):
 class Enrollment(Base):
     __tablename__ = "Enrollment"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
-    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="RESTRICT"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
+    subjectId = Column(String(191), ForeignKey("Subject.id", ondelete="RESTRICT"), nullable=False)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     user = relationship("User", back_populates="enrollments")
@@ -110,9 +110,9 @@ class Enrollment(Base):
 class VideoProgress(Base):
     __tablename__ = "VideoProgress"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
-    videoId = Column(String(36), ForeignKey("Video.id", ondelete="RESTRICT"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
+    videoId = Column(String(191), ForeignKey("Video.id", ondelete="RESTRICT"), nullable=False)
     lastPositionSeconds = Column(Integer, default=0, nullable=False)
     isCompleted = Column(Boolean, default=False, nullable=False)
     completedAt = Column(DateTime, nullable=True)
@@ -127,8 +127,8 @@ class VideoProgress(Base):
 class RefreshToken(Base):
     __tablename__ = "RefreshToken"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="RESTRICT"), nullable=False)
     tokenHash = Column(String(191), nullable=False)
     expiresAt = Column(DateTime, nullable=False)
     revokedAt = Column(DateTime, nullable=True)
@@ -142,8 +142,8 @@ class Comment(Base):
     __tablename__ = "Comment"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    videoId = Column(String(36), ForeignKey("Video.id", ondelete="CASCADE"), nullable=False)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    videoId = Column(String(191), ForeignKey("Video.id", ondelete="CASCADE"), nullable=False)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     parentId = Column(BigInteger, ForeignKey("Comment.id", ondelete="SET NULL"), nullable=True)
     content = Column(Text, nullable=False)
     isPinned = Column(Boolean, default=False, nullable=False)
@@ -162,7 +162,7 @@ class CommentUpvote(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     commentId = Column(BigInteger, ForeignKey("Comment.id", ondelete="CASCADE"), nullable=False)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     comment = relationship("Comment", back_populates="upvotes")
@@ -174,8 +174,8 @@ class Review(Base):
     __tablename__ = "Review"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    subjectId = Column(String(191), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     rating = Column(Integer, nullable=False)
     review = Column(String(1000), nullable=True)
     isEdited = Column(Boolean, default=False, nullable=False)

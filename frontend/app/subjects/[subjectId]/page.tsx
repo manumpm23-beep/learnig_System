@@ -55,9 +55,9 @@ export default function SubjectPage({ params }: { params: { subjectId: string } 
   }, [params.subjectId, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#f9fafb]">
-      <Loader2 className="w-10 h-10 text-[#2d2d2d] animate-spin mb-4" />
-      <p className="text-[#6b7280] font-medium text-lg">Loading...</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d0d14]">
+      <Loader2 className="w-10 h-10 text-[#7F77DD] animate-spin mb-4" />
+      <p className="text-white/50 font-medium text-lg">Loading your course...</p>
     </div>
   );
 }

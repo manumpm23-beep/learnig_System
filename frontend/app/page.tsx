@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { 
   ArrowRight, Rocket, Sparkles, PlayCircle, 
-  Video, BarChart3, MessageSquare, Star, Filter, Award 
+  Video, BarChart3, MessageSquare, Star, Filter, Award, BookOpen
 } from 'lucide-react';
 
 function LandingPage() {

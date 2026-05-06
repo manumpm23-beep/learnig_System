@@ -33,9 +33,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     commentUpvotes = relationship("CommentUpvote", back_populates="user")
     reviews = relationship("Review", back_populates="user")
-    notifications = relationship("Notification", back_populates="user")
-    certificates = relationship("Certificate", back_populates="user")
-    purchases = relationship("Purchase", back_populates="user")
+    notifications = relationship("Notification", primaryjoin="User.id == Notification.userId", back_populates="user")
+    certificates = relationship("Certificate", primaryjoin="User.id == Certificate.userId", back_populates="user")
+    purchases = relationship("Purchase", primaryjoin="User.id == Purchase.userId", back_populates="user")
 
 class Subject(Base):
     __tablename__ = "Subject"
@@ -56,8 +56,8 @@ class Subject(Base):
     sections = relationship("Section", back_populates="subject")
     enrollments = relationship("Enrollment", back_populates="subject")
     reviews = relationship("Review", back_populates="subject")
-    certificates = relationship("Certificate", back_populates="subject")
-    purchases = relationship("Purchase", back_populates="subject")
+    certificates = relationship("Certificate", primaryjoin="Subject.id == Certificate.subjectId", back_populates="subject")
+    purchases = relationship("Purchase", primaryjoin="Subject.id == Purchase.subjectId", back_populates="subject")
     price = Column(Integer, default=0, nullable=False)
 
 class Section(Base):

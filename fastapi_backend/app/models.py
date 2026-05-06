@@ -33,9 +33,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     commentUpvotes = relationship("CommentUpvote", back_populates="user")
     reviews = relationship("Review", back_populates="user")
-    notifications = relationship("Notification", primaryjoin="User.id == Notification.userId", back_populates="user")
-    certificates = relationship("Certificate", primaryjoin="User.id == Certificate.userId", back_populates="user")
-    purchases = relationship("Purchase", primaryjoin="User.id == Purchase.userId", back_populates="user")
+    notifications = relationship("Notification", primaryjoin="User.id == foreign(Notification.userId)", back_populates="user")
+    certificates = relationship("Certificate", primaryjoin="User.id == foreign(Certificate.userId)", back_populates="user")
+    purchases = relationship("Purchase", primaryjoin="User.id == foreign(Purchase.userId)", back_populates="user")
 
 class Subject(Base):
     __tablename__ = "Subject"
@@ -56,8 +56,8 @@ class Subject(Base):
     sections = relationship("Section", back_populates="subject")
     enrollments = relationship("Enrollment", back_populates="subject")
     reviews = relationship("Review", back_populates="subject")
-    certificates = relationship("Certificate", primaryjoin="Subject.id == Certificate.subjectId", back_populates="subject")
-    purchases = relationship("Purchase", primaryjoin="Subject.id == Purchase.subjectId", back_populates="subject")
+    certificates = relationship("Certificate", primaryjoin="Subject.id == foreign(Certificate.subjectId)", back_populates="subject")
+    purchases = relationship("Purchase", primaryjoin="Subject.id == foreign(Purchase.subjectId)", back_populates="subject")
     price = Column(Integer, default=0, nullable=False)
 
 class Section(Base):
@@ -197,7 +197,7 @@ class Notification(Base):
     is_read = Column(Boolean, default=False, nullable=False)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", primaryjoin="User.id == Notification.userId", foreign_keys=[userId], back_populates="notifications")
+    user = relationship("User", primaryjoin="foreign(Notification.userId) == User.id", back_populates="notifications")
 
 class Certificate(Base):
     __tablename__ = "Certificate"
@@ -208,8 +208,8 @@ class Certificate(Base):
     issuedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
     certificateCode = Column(String(191), nullable=False)
 
-    user = relationship("User", primaryjoin="User.id == Certificate.userId", foreign_keys=[userId], back_populates="certificates")
-    subject = relationship("Subject", primaryjoin="Subject.id == Certificate.subjectId", foreign_keys=[subjectId], back_populates="certificates")
+    user = relationship("User", primaryjoin="foreign(Certificate.userId) == User.id", back_populates="certificates")
+    subject = relationship("Subject", primaryjoin="foreign(Certificate.subjectId) == Subject.id", back_populates="certificates")
 
 class Purchase(Base):
     __tablename__ = "Purchase"
@@ -224,5 +224,5 @@ class Purchase(Base):
     status = Column(String(50), default="pending", nullable=False)
     purchasedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", primaryjoin="User.id == Purchase.userId", foreign_keys=[userId], back_populates="purchases")
-    subject = relationship("Subject", primaryjoin="Subject.id == Purchase.subjectId", foreign_keys=[subjectId], back_populates="purchases")
+    user = relationship("User", primaryjoin="foreign(Purchase.userId) == User.id", back_populates="purchases")
+    subject = relationship("Subject", primaryjoin="foreign(Purchase.subjectId) == Subject.id", back_populates="purchases")

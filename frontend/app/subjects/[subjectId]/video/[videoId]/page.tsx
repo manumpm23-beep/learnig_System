@@ -12,7 +12,8 @@ import {
   Trophy, Search, Star, MessageCircle, PlayCircle, 
   ChevronDown, ChevronUp, CheckCircle2, Lock, 
   Loader2, ThumbsUp, Pin, Trash2, Pencil, Users, 
-  Clock, BookOpen, ChevronRight, MessageSquarePlus
+  Clock, BookOpen, ChevronRight, MessageSquarePlus,
+  Zap, Menu, X, Award, ChevronLeft, Circle
 } from 'lucide-react';
 
 function timeAgo(dateInput: string | Date | any) {
@@ -58,7 +59,6 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  const [showAsk, setShowAsk] = useState(false);
   const [newCommentText, setNewCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -94,7 +94,6 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
     try {
       await apiClient.post(`/api/videos/${videoId}/comments`, { content: newCommentText });
       setNewCommentText('');
-      setShowAsk(false);
       loadComments();
     } catch(e) {} finally { setSubmitting(false); }
   };
@@ -159,32 +158,32 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
     const isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Instructor');
 
     return (
-      <div key={c.id} className={`flex gap-4 py-5 ${isReply ? 'ml-12 border-t border-[#e5e7eb]' : 'border-b border-[#e5e7eb]'} w-full border-dashed group`}>
+      <div key={c.id} className={`flex gap-4 py-5 ${isReply ? 'ml-[44px] border-t border-[rgba(255,255,255,0.07)]' : 'border-b border-[rgba(255,255,255,0.07)]'} w-full border-dashed group`}>
          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 ${stringToColor(c.user.name)}`}>
             {getInitials(c.user.name)}
          </div>
          <div className="flex-1 min-w-0">
             {c.isPinned && !isReply && (
-              <div className="flex items-center gap-1 text-[11px] font-bold text-[#f69c08] mb-1">
-                 📌 Pinned Question
+              <div className="flex items-center gap-1 text-[10px] font-bold text-[#f5a623] mb-1 uppercase tracking-wider bg-[rgba(245,166,35,0.10)] px-2 py-0.5 rounded w-fit">
+                 📌 Pinned
               </div>
             )}
             
-            <h4 className="font-bold text-[15px] mb-1 text-[#1c1d1f] flex items-center gap-2 max-w-full">
-               <span className="truncate">{c.user.name.split(' ')[0]}'s question</span>
-               <span className="text-[#6b7280] text-xs font-normal shrink-0">· {timeAgo(c.createdAt)}</span>
+            <h4 className="font-bold text-[15px] mb-1 text-[#fff] flex items-center gap-2 max-w-full">
+               <span className="truncate">{c.user.name}</span>
+               <span className="text-[rgba(255,255,255,0.35)] text-xs font-normal shrink-0">· {timeAgo(c.createdAt)}</span>
             </h4>
 
-            <p className="text-[14px] text-[#6b7280] mb-2 truncate group-hover:whitespace-normal group-hover:text-[#1c1d1f] transition-all duration-200">
+            <p className="text-[14px] text-[rgba(255,255,255,0.65)] mb-2 whitespace-pre-wrap leading-relaxed">
                {c.content}
             </p>
             
-            <div className="flex flex-wrap items-center gap-4 text-[13px] text-[#6b7280]">
+            <div className="flex flex-wrap items-center gap-4 text-[13px] text-[rgba(255,255,255,0.35)]">
                {isAdmin && !isReply && (
-                  <button onClick={() => handleTogglePin(c.id)} className="hover:text-[#2d2d2d] underline">Pin</button>
+                  <button onClick={() => handleTogglePin(c.id)} className="hover:text-[#f5a623] transition-colors underline">Pin</button>
                )}
                {isOwner && (
-                  <button onClick={() => handleDelete(c.id)} className="text-red-500 hover:text-red-700 underline">Delete</button>
+                  <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-300 transition-colors underline">Delete</button>
                )}
             </div>
 
@@ -193,12 +192,12 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
                <div className="mt-4 flex flex-col gap-3">
                   <textarea 
                      value={replyText} onChange={e => setReplyText(e.target.value)}
-                     className="w-full border border-[#e5e7eb] rounded-lg p-3 text-sm focus:outline-none focus:border-[#2d2d2d] resize-y min-h-[80px]" 
+                     className="w-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.06)] text-white rounded-lg p-3 text-sm focus:outline-none focus:border-[#f5a623] resize-y min-h-[80px]" 
                      placeholder="Write a reply..."
                   />
                   <div className="flex gap-3">
-                     <button onClick={() => handlePostReply(c.id)} className="bg-[#2d2d2d] text-white px-5 py-2 font-bold text-[13px] rounded-lg hover:bg-black transition-colors">Post Reply</button>
-                     <button onClick={() => setActiveReplyId(null)} className="text-[#2d2d2d] text-[13px] font-bold border border-[#e5e7eb] rounded-lg px-5 py-2 hover:bg-gray-50 transition-colors">Cancel</button>
+                     <button onClick={() => handlePostReply(c.id)} className="bg-[#f5a623] text-[#0d0e10] px-5 py-2 font-bold text-[13px] rounded-lg hover:bg-[#e49b20] transition-colors">Post Reply</button>
+                     <button onClick={() => setActiveReplyId(null)} className="text-[#fff] text-[13px] font-bold border border-[rgba(255,255,255,0.1)] rounded-lg px-5 py-2 hover:bg-[rgba(255,255,255,0.05)] transition-colors">Cancel</button>
                   </div>
                </div>
             )}
@@ -209,15 +208,15 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
          <div className="flex flex-col items-end gap-3 shrink-0 ml-2 w-16 pt-1">
             <button 
               onClick={() => handleToggleUpvote(c.id, isReply, parentId)}
-              className="flex items-center gap-1.5 font-medium text-[13px] text-[#6b7280] hover:text-[#2d2d2d] transition-colors"
+              className="flex items-center gap-1.5 font-medium text-[13px] text-[rgba(255,255,255,0.35)] hover:text-[#f5a623] transition-colors"
             >
-               <ThumbsUp className={`w-4 h-4 ${c.hasUpvoted ? 'text-[#2d2d2d] fill-current' : ''}`} />
+               <ThumbsUp className={`w-4 h-4 ${c.hasUpvoted ? 'text-[#f5a623] fill-current' : ''}`} />
                {c.upvoteCount || 0}
             </button>
             {!isReply && (
                <button 
                  onClick={() => { setActiveReplyId(activeReplyId === c.id ? null : c.id); setReplyText(''); }}
-                 className="flex items-center gap-1.5 text-[13px] font-medium text-[#6b7280] hover:text-[#2d2d2d] transition-colors"
+                 className="flex items-center gap-1.5 text-[13px] font-medium text-[rgba(255,255,255,0.35)] hover:text-[#fff] transition-colors"
                >
                  <MessageCircle className="w-4 h-4" />
                  {c.replyCount || c.replies?.length || 0}
@@ -229,58 +228,38 @@ function QATab({ videoId, currentUser }: { videoId: string, currentUser: any }) 
   };
 
   return (
-    <div className="animate-in fade-in flex flex-col h-full relative" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" }}>
+    <div className="flex flex-col h-full relative fade-in-tab max-w-[760px] pb-16">
        
-       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-          <div className="flex-1 w-full flex flex-col sm:flex-row gap-4">
-             <div className="relative flex-1 max-w-md">
-                <input type="text" placeholder="Search questions..." className="w-full border border-[#e5e7eb] rounded-lg p-3 pr-10 text-[14px] focus:outline-none focus:border-[#2d2d2d] placeholder-[#6b7280]" />
-                <Search className="w-4 h-4 absolute right-3 top-3.5 text-[#6b7280]" />
+       <div className="mb-8 p-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[12px]">
+          <div className="flex items-start gap-4">
+             <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 bg-gradient-to-br from-[#f5a623] to-amber-600">
+               {getInitials(currentUser?.name || 'U')}
              </div>
-             <select className="border border-[#e5e7eb] rounded-lg py-3 px-4 text-[14px] bg-white focus:outline-none focus:border-[#2d2d2d] cursor-pointer text-[#1c1d1f] shrink-0 font-medium w-full sm:w-auto">
-                <option>Newest</option>
-                <option>Most Upvoted</option>
-             </select>
+             <div className="flex-1">
+               <textarea 
+                  value={newCommentText}
+                  onChange={e => setNewCommentText(e.target.value)}
+                  placeholder="What do you need help with?"
+                  className="w-full border border-[rgba(255,255,255,0.1)] rounded-[8px] p-3 focus:outline-none focus:border-[#f5a623] min-h-[80px] resize-y text-[14px] bg-[rgba(255,255,255,0.06)] text-white placeholder-[rgba(255,255,255,0.35)] mb-3" 
+               />
+               <div className="flex justify-end">
+                  <button 
+                     onClick={handlePostComment}
+                     disabled={!newCommentText.trim() || submitting}
+                     className="bg-[#f5a623] text-[#0d0e10] font-bold py-2 px-6 rounded-lg hover:bg-[#e49b20] disabled:opacity-50 text-[13px] transition-colors"
+                  >
+                     {submitting ? 'Posting...' : 'Post Question'}
+                  </button>
+               </div>
+             </div>
           </div>
-          {currentUser && (
-             <button 
-               onClick={() => setShowAsk(!showAsk)}
-               className="bg-[#2d2d2d] text-white px-5 py-3 rounded-lg text-[14px] font-bold hover:bg-black transition-colors shrink-0 w-full md:w-auto"
-             >
-               Ask a Question
-             </button>
-          )}
        </div>
 
-       {showAsk && currentUser && (
-         <div className="mb-8 p-6 border border-[#e5e7eb] bg-white rounded-xl shadow-sm">
-            <h3 className="font-bold text-[15px] text-[#1c1d1f] mb-3">Ask a new question</h3>
-            <textarea 
-               value={newCommentText}
-               onChange={e => setNewCommentText(e.target.value)}
-               placeholder="What do you need help with?"
-               className="w-full border border-[#e5e7eb] rounded-lg p-4 focus:outline-none focus:border-[#2d2d2d] min-h-[120px] resize-y text-[14px] mb-4 bg-[#f9fafb]" 
-            />
-            <div className="flex gap-3">
-               <button 
-                  onClick={handlePostComment}
-                  disabled={!newCommentText.trim() || submitting}
-                  className="bg-[#2d2d2d] text-white font-bold py-2.5 px-6 rounded-lg hover:bg-black disabled:opacity-50 text-[14px]"
-               >
-                  {submitting ? 'Posting...' : 'Post Question'}
-               </button>
-               <button onClick={() => setShowAsk(false)} className="text-[#2d2d2d] font-bold py-2.5 px-6 border border-[#e5e7eb] rounded-lg hover:bg-gray-50 text-[14px]">
-                 Cancel
-               </button>
-            </div>
-         </div>
-       )}
-
-       <div className="mb-12 bg-white rounded-xl border border-[#e5e7eb] px-6">
+       <div className="px-2">
          {loading ? (
-            <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-[#2d2d2d] animate-spin" /></div>
+            <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-[#f5a623] animate-spin" /></div>
          ) : comments.length === 0 ? (
-            <div className="py-16 text-center text-[#6b7280] font-medium">No questions yet. Be the first to ask!</div>
+            <div className="py-16 text-center text-[rgba(255,255,255,0.35)] font-medium">No questions yet. Be the first to ask!</div>
          ) : (
             <div className="flex flex-col">
                {comments.map(c => renderComment(c))}
@@ -311,6 +290,7 @@ export default function VideoLessonPage({ params }: { params: { subjectId: strin
   const [video, setVideo] = useState<VideoData | null>(null);
   const [progress, setProgress] = useState<{ lastPositionSeconds: number, isCompleted: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const [activeTab, setActiveTab] = useState('Overview');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -363,18 +343,15 @@ export default function VideoLessonPage({ params }: { params: { subjectId: strin
     try {
       await apiClient.post(`/api/progress/videos/${videoId}`, { isCompleted: true });
       markVideoCompleted(videoId);
+      setProgress(p => p ? { ...p, isCompleted: true } : { lastPositionSeconds: 0, isCompleted: true });
       if (video?.nextVideoId) {
          router.push(`/subjects/${subjectId}/video/${video.nextVideoId}`);
       }
     } catch (e) {}
   }, [videoId, video, markVideoCompleted, router, subjectId]);
 
-  const fontFam = "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif";
-
   let compiled = 0; let tot = 0;
-  let totalSections = 0;
   if (tree) {
-    totalSections = tree.sections.length;
     tree.sections.forEach(sec => {
       sec.videos.forEach((v: any) => { tot++; if (v.isCompleted) compiled++; });
     });
@@ -382,126 +359,291 @@ export default function VideoLessonPage({ params }: { params: { subjectId: strin
   const pct = tot > 0 ? Math.round((compiled / tot) * 100) : 0;
 
   if (loading || !video) {
-    return <div className="flex h-screen items-center justify-center bg-[#f9fafb]"><Loader2 className="w-10 h-10 text-[#2d2d2d] animate-spin" /></div>;
+    return <div className="flex h-screen items-center justify-center bg-[#0d0e10]"><Loader2 className="w-10 h-10 text-[#f5a623] animate-spin" /></div>;
   }
 
+  const isCurrentCompleted = progress?.isCompleted || (tree?.sections.some(s => s.videos.find(v => v.id === videoId && v.isCompleted)));
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#f9fafb] text-[#1c1d1f]" style={{ fontFamily: fontFam }}>
-      
-      {/* TOP NAV BAR (fixed) */}
-      <div className="flex items-center justify-between px-6 z-50 shrink-0 bg-[#1c1d1f] text-white h-[56px] shadow-sm">
-         <div className="flex items-center gap-4 min-w-0 pr-4">
-            <Link href="/" className="font-extrabold text-[16px] shrink-0 border-r border-[#3e4143] pr-4 py-1.5 hover:text-gray-300 flex items-center gap-2">
-               <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
-                 <PlayCircle className="w-4 h-4 text-white" />
-               </div>
-            </Link>
-            <h1 className="font-medium text-[14px] truncate max-w-lg">{video.subjectTitle || 'Course'}</h1>
-         </div>
-         <div className="flex items-center gap-4 shrink-0">
-            <button className="flex items-center gap-2 text-[14px] font-medium text-white/90 hover:text-white">
-               <Trophy className="w-4 h-4 text-[#f69c08]" />
-               <span className="hidden sm:inline">Your progress</span>
-               <span className="font-bold">{pct}%</span>
-            </button>
-         </div>
-      </div>
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap');
+        
+        .font-dm-sans { font-family: 'DM Sans', sans-serif; }
+        .font-dm-serif { font-family: 'DM Serif Display', serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.12);
+          border-radius: 99px;
+        }
 
-      {/* MAIN TWO-COLUMN */}
-      <div className="flex flex-1 overflow-hidden relative w-full h-full">
-         
-         {/* LEFT SIDE */}
-         <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative scroll-smooth pb-16 bg-[#f9fafb] h-full custom-scrollbar-hidden">
-            
-            {/* Video Player */}
-            {video.locked ? (
-               <div className="w-full aspect-video bg-black flex flex-col items-center justify-center text-white p-0 m-0">
-                  <Lock className="w-12 h-12 text-[#6b7280] mb-4" />
-                  <h2 className="text-xl font-bold mb-2">Content Locked</h2>
-                  {video.previousVideoId && (
-                     <Link href={`/subjects/${subjectId}/video/${video.previousVideoId}`} className="bg-[#2d2d2d] px-6 py-3 font-bold mt-4 hover:bg-black rounded-lg transition-colors text-[14px]">
-                        Play Previous Lesson
-                     </Link>
-                  )}
-               </div>
-            ) : (
-               <div className="w-full bg-black shrink-0 relative p-0 m-0 aspect-video">
-                 <VideoPlayer
-                   videoId={video.id}
-                   youtubeUrl={video.youtubeUrl}
-                   startPositionSeconds={progress?.lastPositionSeconds || 0}
-                   onProgress={handleProgress}
-                   onCompleted={handleCompleted}
-                   className="w-full h-full"
-                 />
-               </div>
-            )}
+        @keyframes fadeInTab {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: none; }
+        }
+        .fade-in-tab {
+          animation: fadeInTab 0.3s ease forwards;
+        }
+      `}} />
 
-            {/* Sticky Tabs */}
-            <div className="sticky top-0 bg-white border-b border-[#e5e7eb] z-20 px-8 w-full flex gap-8 shadow-sm">
-               {['Overview', 'Q&A', 'Reviews'].map(tab => (
-                 <button 
-                   key={tab} 
-                   onClick={() => setActiveTab(tab)}
-                   className={`py-4 text-[14px] bg-white transition border-b-[3px] focus:outline-none   
-                   ${activeTab === tab ? 'border-[#2d2d2d] font-bold text-[#1c1d1f]' : 'border-transparent text-[#6b7280] font-medium hover:text-[#1c1d1f]'}`}
-                 >
-                   {tab}
-                 </button>
-               ))}
-            </div>
+      <div className="flex flex-col h-[100dvh] overflow-hidden bg-[#0d0e10] text-[#fff] font-dm-sans">
+        
+        {/* TOP NAV BAR */}
+        <div className="flex items-center justify-between px-4 sm:px-6 shrink-0 bg-[#0d0e10] border-b border-[rgba(255,255,255,0.07)] h-[52px]">
+           <div className="flex items-center gap-3 min-w-0 pr-4">
+              <Link href={`/subjects/${subjectId}`} className="w-[28px] h-[28px] bg-[#f5a623] rounded-[8px] flex items-center justify-center shrink-0 hover:scale-105 transition-transform">
+                 <PlayCircle className="w-[18px] h-[18px] text-[#0d0e10] fill-current" />
+              </Link>
+              <div className="w-px h-4 bg-[rgba(255,255,255,0.07)] shrink-0"></div>
+              <h1 className="font-medium text-[13px] text-white truncate max-w-[300px]">{video.subjectTitle}</h1>
+           </div>
+           
+           <div className="flex items-center gap-3 shrink-0">
+              <div className="hidden sm:flex items-center gap-1.5 border border-[rgba(255,255,255,0.1)] rounded-[6px] p-1">
+                 {video.previousVideoId ? (
+                   <Link href={`/subjects/${subjectId}/video/${video.previousVideoId}`} className="px-2.5 py-1 text-[12px] text-[rgba(255,255,255,0.65)] hover:text-white transition-colors flex items-center gap-1">
+                     <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                   </Link>
+                 ) : (
+                   <span className="px-2.5 py-1 text-[12px] text-[rgba(255,255,255,0.2)] flex items-center gap-1 cursor-not-allowed">
+                     <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                   </span>
+                 )}
+                 <div className="w-px h-3 bg-[rgba(255,255,255,0.1)]"></div>
+                 {video.nextVideoId ? (
+                   <Link href={`/subjects/${subjectId}/video/${video.nextVideoId}`} className="px-2.5 py-1 text-[12px] text-[rgba(255,255,255,0.65)] hover:text-white transition-colors flex items-center gap-1">
+                     Next <ChevronRight className="w-3.5 h-3.5" />
+                   </Link>
+                 ) : (
+                   <span className="px-2.5 py-1 text-[12px] text-[rgba(255,255,255,0.2)] flex items-center gap-1 cursor-not-allowed">
+                     Next <ChevronRight className="w-3.5 h-3.5" />
+                   </span>
+                 )}
+              </div>
 
-            {/* Tab Contents */}
-            <div className="p-8 max-w-5xl mx-auto w-full">
-               
-               {activeTab === 'Overview' && (
-                 <div className="animate-in fade-in space-y-8 bg-white p-8 rounded-xl border border-[#e5e7eb]">
-                    <h2 className="text-3xl font-bold tracking-tight text-[#1c1d1f]">{video.title}</h2>
-                    
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 border-b border-[#e5e7eb]">
-                       {/* Instructor */}
-                       <div className="flex items-center gap-3">
-                          <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${video.subjectId}`} className="w-10 h-10 rounded-full border border-[#e5e7eb] bg-[#f9fafb]" alt="avatar" />
-                          <div className="flex flex-col">
-                             <span className="text-[12px] text-[#6b7280] font-medium uppercase tracking-wider">Instructor</span>
-                             <span className="font-bold text-[14px] text-[#1c1d1f]">Sarah Jenkins</span>
-                          </div>
-                       </div>
-                       <div className="hidden sm:block w-px h-10 bg-[#e5e7eb]"></div>
-                       {/* Stats */}
-                       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[14px] text-[#6b7280] font-medium">
-                          <div className="flex items-center gap-1.5"><Star className="w-4 h-4 text-[#f69c08] fill-current" /> <span className="text-[#1c1d1f] font-bold">4.8</span></div>
-                          <div className="flex items-center gap-1.5"><Users className="w-4 h-4" /> 12,400+ students</div>
-                          <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> 16.5 hours</div>
-                          <div className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" /> {tot} lessons</div>
-                       </div>
+              <div className="hidden md:flex border border-[rgba(255,255,255,0.1)] rounded-[6px] px-2.5 py-1 text-[12px] font-bold text-[#f5a623] items-center gap-1.5 bg-[rgba(245,166,35,0.05)]">
+                 <Trophy className="w-3.5 h-3.5" /> {pct}%
+              </div>
+
+              <div className="w-px h-4 bg-[rgba(255,255,255,0.07)] shrink-0 hidden md:block mx-1"></div>
+
+              <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="w-8 h-8 rounded-[6px] border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-[rgba(255,255,255,0.65)] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+              >
+                 {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+           </div>
+        </div>
+
+        {/* MAIN ROW */}
+        <div className="flex flex-1 overflow-hidden relative">
+           
+           {/* LEFT COLUMN (Video + Tabs) */}
+           <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar relative bg-[#0d0e10] min-w-0">
+              
+              {/* VIDEO AREA */}
+              <div className="w-full bg-[#000] shrink-0 relative flex flex-col items-center justify-center border-b border-[rgba(255,255,255,0.07)]" style={{ aspectRatio: '16/9', maxHeight: '56vh' }}>
+                 {video.locked ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-white">
+                       <Lock className="w-10 h-10 text-[rgba(255,255,255,0.35)] mb-4" />
+                       <h2 className="text-[16px] font-bold mb-1">Lesson Locked</h2>
+                       <p className="text-[13px] text-[rgba(255,255,255,0.65)] mb-5 max-w-sm text-center">
+                         {video.unlockReason || "You must complete the previous lessons to unlock this video."}
+                       </p>
+                       {video.previousVideoId && (
+                          <Link href={`/subjects/${subjectId}/video/${video.previousVideoId}`} className="bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] text-[#f5a623] px-5 py-2.5 font-bold rounded-lg hover:bg-[rgba(245,166,35,0.2)] transition-colors text-[13px] flex items-center gap-2">
+                             <ChevronLeft className="w-4 h-4" /> Go to Previous Lesson
+                          </Link>
+                       )}
                     </div>
-                    
-                    <div>
-                      <h3 className="font-bold text-[16px] mb-4 text-[#1c1d1f]">About this lesson</h3>
-                      <div className="text-[15px] leading-relaxed whitespace-pre-wrap text-[#6b7280]">
-                        {video.description || "In this comprehensive lesson, we break down core architectural capabilities and seamlessly integrate components together to ensure robust scalable structures."}
+                 ) : (
+                    <VideoPlayer
+                      videoId={video.id}
+                      youtubeUrl={video.youtubeUrl}
+                      startPositionSeconds={progress?.lastPositionSeconds || 0}
+                      onProgress={handleProgress}
+                      onCompleted={handleCompleted}
+                      className="w-full h-full"
+                    />
+                 )}
+              </div>
+
+              {/* TAB BAR */}
+              <div className="sticky top-0 bg-[#0d0e10] border-b border-[rgba(255,255,255,0.07)] z-20 px-7 w-full flex gap-6 shrink-0">
+                 {['Overview', 'Q&A', 'Reviews'].map(tab => (
+                   <button 
+                     key={tab} 
+                     onClick={() => setActiveTab(tab)}
+                     className={`py-3.5 text-[13px] font-semibold transition-colors border-b-2 focus:outline-none   
+                     ${activeTab === tab ? 'border-[#f5a623] text-[#f5a623]' : 'border-transparent text-[rgba(255,255,255,0.4)] hover:text-[#fff]'}`}
+                   >
+                     {tab}
+                   </button>
+                 ))}
+              </div>
+
+              {/* TAB CONTENTS */}
+              <div className="flex-1">
+                 {activeTab === 'Overview' && (
+                   <div className="max-w-[760px] p-7 fade-in-tab">
+                      <h1 className="font-dm-serif text-[28px] font-normal leading-tight text-white mb-5">{video.title}</h1>
+                      
+                      {/* Meta strip */}
+                      <div className="flex flex-wrap items-center gap-5 py-3 border-y border-[rgba(255,255,255,0.07)] mb-6">
+                         <div className="flex items-center gap-1.5 text-[13px] text-[rgba(255,255,255,0.55)]">
+                           <Star className="w-3.5 h-3.5 text-[#f5a623] fill-current" /> 4.8
+                         </div>
+                         <div className="w-1 h-1 rounded-full bg-[rgba(255,255,255,0.15)]"></div>
+                         <div className="flex items-center gap-1.5 text-[13px] text-[rgba(255,255,255,0.55)]">
+                           <Users className="w-3.5 h-3.5" /> 12,400+
+                         </div>
+                         <div className="w-1 h-1 rounded-full bg-[rgba(255,255,255,0.15)]"></div>
+                         <div className="flex items-center gap-1.5 text-[13px] text-[rgba(255,255,255,0.55)]">
+                           <Clock className="w-3.5 h-3.5" /> 16.5 hours
+                         </div>
+                         <div className="w-1 h-1 rounded-full bg-[rgba(255,255,255,0.15)]"></div>
+                         <div className="flex items-center gap-1.5 text-[13px] text-[rgba(255,255,255,0.55)]">
+                           <BookOpen className="w-3.5 h-3.5" /> {tot} lessons
+                         </div>
                       </div>
-                      <button className="text-[#2d2d2d] font-bold hover:bg-gray-100 px-4 py-2 mt-4 rounded-lg flex items-center gap-1 border border-[#e5e7eb] text-[13px] transition-colors">
-                        Show more <ChevronDown className="w-4 h-4 mt-0.5" />
-                      </button>
-                    </div>
-                 </div>
-               )}
+                      
+                      <div className="inline-flex items-center bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] rounded-[6px] px-2.5 py-1 text-[12px] text-white mb-6">
+                         {video.sectionTitle}
+                      </div>
+                      
+                      <div className="text-[14px] leading-[1.75] text-[rgba(255,255,255,0.65)] mb-8 whitespace-pre-wrap">
+                         {video.description || "In this comprehensive lesson, we break down core architectural capabilities and seamlessly integrate components together to ensure robust scalable structures."}
+                      </div>
 
-               {activeTab === 'Q&A' && (
-                 <QATab videoId={videoId} currentUser={user} />
-               )}
+                      <div className="bg-[rgba(245,166,35,0.06)] border border-[rgba(245,166,35,0.15)] rounded-[12px] p-5 sm:p-6 mb-8">
+                         <div className="flex items-center gap-2 mb-4">
+                            <Zap className="w-3.5 h-3.5 text-[#f5a623] fill-current" />
+                            <span className="text-[11px] uppercase tracking-widest font-bold text-[#f5a623]">What you'll learn</span>
+                         </div>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-[13px] text-[rgba(255,255,255,0.8)]">
+                            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#4ade80] shrink-0 mt-0.5" /> Understand core cinema-grade architecture patterns.</div>
+                            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#4ade80] shrink-0 mt-0.5" /> Integrate real-world scalable APIs cleanly.</div>
+                            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#4ade80] shrink-0 mt-0.5" /> Master state synchronization securely.</div>
+                            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#4ade80] shrink-0 mt-0.5" /> Deliver high-performance frontend interfaces.</div>
+                         </div>
+                      </div>
 
-               {activeTab === 'Reviews' && (
-                 <CourseReviews subjectId={subjectId} currentUser={user} />
-               )}
+                      <div>
+                         {!isCurrentCompleted ? (
+                           <button onClick={handleCompleted} className="bg-[#f5a623] text-[#0d0e10] rounded-[10px] px-6 py-[13px] font-extrabold text-[14px] hover:bg-[#e49b20] transition-colors">
+                              Complete & Next Lesson
+                           </button>
+                         ) : (
+                           <div className="inline-flex items-center gap-2 bg-[#4ade80]/10 border border-[#4ade80]/20 text-[#4ade80] rounded-[10px] px-6 py-[13px] font-bold text-[14px]">
+                              <Award className="w-4 h-4" /> Lesson completed!
+                           </div>
+                         )}
+                      </div>
+                   </div>
+                 )}
 
-            </div>
-         </div>
+                 {activeTab === 'Q&A' && (
+                   <div className="p-7">
+                     <QATab videoId={videoId} currentUser={user} />
+                   </div>
+                 )}
 
+                 {activeTab === 'Reviews' && (
+                   <div className="p-7 fade-in-tab max-w-[760px]">
+                     <CourseReviews subjectId={subjectId} currentUser={user} />
+                   </div>
+                 )}
+              </div>
+           </div>
 
+           {/* RIGHT COLUMN (Sidebar) */}
+           {sidebarOpen && (
+             <div className="w-[320px] bg-[#161820] border-l border-[rgba(255,255,255,0.07)] shrink-0 flex flex-col overflow-hidden h-full z-10 transition-all">
+                <div className="p-5 border-b border-[rgba(255,255,255,0.07)] shrink-0">
+                   <div className="text-[10px] uppercase tracking-wider font-bold text-[rgba(255,255,255,0.35)] mb-1">Your Progress</div>
+                   <div className="flex items-end gap-2 mb-2">
+                      <span className="text-[28px] font-extrabold text-[#f5a623] leading-none">{pct}%</span>
+                      <span className="text-[12px] text-[rgba(255,255,255,0.35)] mb-1">{compiled}/{tot} lessons</span>
+                   </div>
+                   <div className="w-full h-1 bg-[rgba(255,255,255,0.08)] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-600 ease-out" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #f5a623, #f5d423)' }}></div>
+                   </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto custom-scrollbar py-3">
+                   {tree?.sections.map((sec, idx) => {
+                      const secTotal = sec.videos.length;
+                      const secDone = sec.videos.filter((v:any) => v.isCompleted).length;
+                      const isExpanded = !!expandedSections[sec.id];
+                      
+                      return (
+                         <div key={sec.id} className="mb-1">
+                            <button 
+                              onClick={() => toggleSection(sec.id)}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[rgba(255,255,255,0.03)] transition-colors text-left"
+                            >
+                               <div className="w-5 h-5 rounded-[6px] bg-[#0d0e10] border border-[rgba(255,255,255,0.07)] flex items-center justify-center text-[10px] font-bold text-[rgba(255,255,255,0.65)] shrink-0">
+                                 {idx + 1}
+                               </div>
+                               <div className="flex-1 min-w-0">
+                                  <h4 className="text-[12px] font-bold text-white truncate">{sec.title}</h4>
+                                  <p className="text-[10px] text-[rgba(255,255,255,0.35)]">{secDone}/{secTotal} lessons</p>
+                               </div>
+                               {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-[rgba(255,255,255,0.35)]" /> : <ChevronDown className="w-3.5 h-3.5 text-[rgba(255,255,255,0.35)]" />}
+                            </button>
+
+                            {isExpanded && (
+                               <div className="py-1">
+                                  {sec.videos.map((v: any) => {
+                                     const isActive = v.id === videoId;
+                                     const isLocked = v.locked;
+                                     const isDone = v.isCompleted;
+
+                                     return (
+                                        <div key={v.id}>
+                                           {isLocked ? (
+                                              <div className="flex items-start gap-3 px-4 py-2 pl-[44px] cursor-not-allowed opacity-40">
+                                                 <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-white" />
+                                                 <span className="text-[12px] font-medium text-white line-clamp-2">{v.title}</span>
+                                              </div>
+                                           ) : (
+                                              <Link 
+                                                href={`/subjects/${subjectId}/video/${v.id}`}
+                                                className={`flex items-start gap-3 px-4 py-2 pl-[44px] transition-colors border-r-2 ${
+                                                  isActive ? 'bg-[rgba(245,166,35,0.1)] border-[#f5a623] text-[#f5a623]' : 'border-transparent hover:bg-[rgba(255,255,255,0.03)] text-[rgba(255,255,255,0.65)] hover:text-white'
+                                                }`}
+                                              >
+                                                 {isDone ? (
+                                                   <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${isActive ? 'text-[#f5a623]' : 'text-[#4ade80]'}`} />
+                                                 ) : isActive ? (
+                                                   <Circle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#f5a623]" />
+                                                 ) : (
+                                                   <Circle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[rgba(255,255,255,0.35)]" />
+                                                 )}
+                                                 <span className="text-[12px] font-medium line-clamp-2">{v.title}</span>
+                                              </Link>
+                                           )}
+                                        </div>
+                                     );
+                                  })}
+                               </div>
+                            )}
+                         </div>
+                      );
+                   })}
+                </div>
+             </div>
+           )}
+
+        </div>
       </div>
-    </div>
+    </>
   );
 }

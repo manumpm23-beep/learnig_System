@@ -13,6 +13,18 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    dateOfBirth: Optional[datetime] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    currentStudying: Optional[str] = None
+    pastStudy: Optional[str] = None
+    linkedinUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    profilePhoto: Optional[str] = None
+
 class UserResponse(UserBase):
     id: str
 

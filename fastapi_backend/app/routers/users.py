@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User, RefreshToken
-from ..schemas import UserRegister, UserLogin, AuthResponse, UserResponse
+from ..schemas import UserRegister, UserLogin, AuthResponse, UserResponse, UserUpdate
 from ..auth import get_password_hash, verify_password, create_access_token, generate_refresh_token_string, hash_refresh_token, get_current_user
 from datetime import datetime, timedelta
 from ..models import Notification
@@ -134,3 +134,15 @@ def get_me(current_user: User = Depends(get_current_user)):
         "updatedAt": current_user.updatedAt,
     }
     return {"user": user_data}
+
+@router.put("/me")
+def update_me(user_update: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    update_data = user_update.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(current_user, key, value)
+        
+    db.commit()
+    db.refresh(current_user)
+    
+    return {"message": "Profile updated successfully", "user": get_me(current_user)["user"]}

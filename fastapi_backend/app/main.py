@@ -2,16 +2,35 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routers import users, courses, videos, progress, dashboard, comments, ratings
+from .routers import users, courses, videos, progress, dashboard, comments, ratings, notifications, certificates, admin, payments
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # We only create tables if they don't exist.
-# However, you already have the existing MySQL tables created by Prisma.
-# Base.metadata.create_all(bind=engine)
+from sqlalchemy import text
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="LMS API Migration")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Alter User table to add role if not exists
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE User ADD COLUMN role VARCHAR(50) DEFAULT 'student' NOT NULL;"))
+    except Exception:
+        pass # Probably already exists
+        
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE Subject ADD COLUMN price INT DEFAULT 0 NOT NULL;"))
+    except Exception:
+        pass
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="LMS API Migration", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +57,18 @@ app.include_router(comments.comments_router, prefix="/api/comments", tags=["comm
 
 # Reviews
 app.include_router(ratings.router, prefix="/api/subjects/{subjectId}/reviews", tags=["reviews"])
+
+# Notifications
+app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
+
+# Certificates
+app.include_router(certificates.router, prefix="/api/certificates", tags=["certificates"])
+
+# Admin
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
+
+# Payments
+app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
 
 @app.get("/api/health")
 def health_check():

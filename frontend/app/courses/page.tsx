@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/apiClient';
 import { useAuthStore } from '@/store/authStore';
+import toast, { Toaster } from 'react-hot-toast';
 import { 
   Search, LayoutGrid, List, BookOpen, Star, 
   Rocket, Database, Layers, Monitor, PenTool, LayoutTemplate,
   CheckCircle, Clock, Bookmark, Play, ArrowRight
 } from 'lucide-react';
+import Navbar from '@/components/Layout/Navbar';
 
 export default function CoursesCatalogPage() {
   const router = useRouter();
@@ -51,14 +53,67 @@ export default function CoursesCatalogPage() {
     fetchData();
   }, [isAuthenticated, router]);
 
-  const handleEnroll = async (courseId: string) => {
+  const handleEnroll = async (course: any) => {
+    if (course.price > 0) {
+      handlePayment(course);
+      return;
+    }
+    
     try {
-      await apiClient.post(`/api/subjects/${courseId}/enroll`);
+      await apiClient.post(`/api/subjects/${course.id}/enroll`);
       // Re-fetch dashboard to update enrolled status
       const dashboardRes = await apiClient.get('/api/dashboard');
       setEnrolledCourses(dashboardRes.data.enrolledCourses || []);
+      toast.success("Enrolled successfully!");
     } catch (err) {
       console.error('Failed to enroll:', err);
+      toast.error("Failed to enroll");
+    }
+  };
+
+  const handlePayment = async (course: any) => {
+    try {
+      const { data } = await apiClient.post('/api/payments/create-order', { course_id: course.id });
+      
+      const options = {
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Learning Platform",
+        description: data.course_title,
+        order_id: data.order_id,
+        handler: async function (response: any) {
+          try {
+            await apiClient.post("/api/payments/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              course_id: course.id
+            });
+            toast.success("Payment successful! Course unlocked.");
+            const dashboardRes = await apiClient.get('/api/dashboard');
+            setEnrolledCourses(dashboardRes.data.enrolledCourses || []);
+          } catch (e) {
+            toast.error("Payment verification failed.");
+          }
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email
+        },
+        theme: {
+          color: "#7F77DD"
+        }
+      };
+      
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any){
+        toast.error("Payment failed. Please try again.");
+      });
+      rzp.open();
+    } catch (err) {
+      console.error("Failed to create order", err);
+      toast.error("Failed to initiate payment");
     }
   };
 
@@ -110,27 +165,11 @@ export default function CoursesCatalogPage() {
 
   return (
     <div className="min-h-screen bg-[#0d0d14] font-sans selection:bg-[#7F77DD]/30 flex flex-col overflow-hidden h-screen">
+      <Toaster position="top-right" />
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       
       {/* Navbar */}
-      <nav className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0d0d14] shrink-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#7F77DD] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(127,119,221,0.5)]">
-            <Rocket className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-white font-bold text-lg tracking-tight">Learning Platform</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm font-medium text-white/50 hover:text-white transition-colors hidden sm:block">Dashboard</Link>
-          <Link href="/courses" className="text-sm font-medium text-white transition-colors hidden sm:block">My Courses</Link>
-          <button className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors relative">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7F77DD] to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm cursor-pointer">
-            {user?.name?.[0]?.toUpperCase() || 'U'}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="flex flex-1 overflow-hidden">
         
@@ -360,12 +399,17 @@ export default function CoursesCatalogPage() {
                             </Link>
                           </div>
                         ) : (
-                          <div className="mt-auto pt-4 border-t border-white/[0.08]">
+                          <div className="mt-auto pt-4 border-t border-white/[0.08] flex items-center justify-between">
+                            {course.price === 0 ? (
+                              <span className="px-2 py-1 bg-green-500/10 text-green-400 text-xs font-bold rounded">Free</span>
+                            ) : (
+                              <span className="text-white font-bold text-lg">₹{course.price}</span>
+                            )}
                             <button 
-                              onClick={() => handleEnroll(course.id)}
-                              className="w-full py-2.5 bg-white/[0.04] text-white hover:text-white text-sm font-bold rounded-lg border border-white/[0.08] hover:bg-white/[0.1] hover:border-white/[0.15] transition-all"
+                              onClick={() => handleEnroll(course)}
+                              className="px-6 py-2.5 bg-white/[0.04] text-white hover:text-white text-sm font-bold rounded-lg border border-white/[0.08] hover:bg-white/[0.1] hover:border-white/[0.15] transition-all"
                             >
-                              Enroll now
+                              {course.price > 0 ? "Buy now" : "Enroll now"}
                             </button>
                           </div>
                         )}

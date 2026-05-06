@@ -10,6 +10,7 @@ import {
   BarChart2, Play, Activity, Sparkles, Trophy, UserPlus, 
   Award, ArrowRight, PlayCircle, Star
 } from 'lucide-react';
+import Navbar from '@/components/Layout/Navbar';
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuthStore();
@@ -138,28 +139,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0d0d14] font-sans selection:bg-[#7F77DD]/30 flex flex-col">
       
       {/* 1. Navbar */}
-      <nav className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0d0d14] sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#7F77DD] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(127,119,221,0.5)]">
-            <Rocket className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-white font-bold text-lg tracking-tight hidden sm:block">Learning Platform</span>
-        </div>
-        <div className="flex items-center gap-8 text-sm font-medium">
-          <Link href="/dashboard" className="text-white">Dashboard</Link>
-          <Link href="/courses" className="text-white/50 hover:text-white transition-colors">Courses</Link>
-          <Link href="#" className="text-white/50 hover:text-white transition-colors hidden sm:block">Community</Link>
-        </div>
-        <div className="flex items-center gap-5">
-          <button className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors relative">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#7F77DD] rounded-full"></span>
-          </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7F77DD] to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm cursor-pointer">
-            {initial}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative">
         <div className="absolute top-0 right-10 w-96 h-96 bg-[#7F77DD]/5 blur-[120px] rounded-full pointer-events-none" />

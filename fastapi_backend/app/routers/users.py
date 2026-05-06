@@ -5,6 +5,7 @@ from ..models import User, RefreshToken
 from ..schemas import UserRegister, UserLogin, AuthResponse, UserResponse
 from ..auth import get_password_hash, verify_password, create_access_token, generate_refresh_token_string, hash_refresh_token, get_current_user
 from datetime import datetime, timedelta
+from ..models import Notification
 
 router = APIRouter()
 
@@ -22,6 +23,14 @@ def register(user_in: UserRegister, response: Response, db: Session = Depends(ge
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    welcome_notification = Notification(
+        userId=new_user.id,
+        type="welcome",
+        message="Welcome to the Learning Platform! Start exploring courses today."
+    )
+    db.add(welcome_notification)
+    db.commit()
 
     access_token = create_access_token(user_id=new_user.id)
     refresh_token_raw = generate_refresh_token_string()
@@ -42,7 +51,7 @@ def register(user_in: UserRegister, response: Response, db: Session = Depends(ge
     )
 
     return {
-        "user": {"id": new_user.id, "email": new_user.email, "name": new_user.name},
+        "user": {"id": new_user.id, "email": new_user.email, "name": new_user.name, "role": new_user.role},
         "accessToken": access_token
     }
 
@@ -71,7 +80,7 @@ def login(user_in: UserLogin, response: Response, db: Session = Depends(get_db))
     )
 
     return {
-        "user": {"id": user.id, "email": user.email, "name": user.name},
+        "user": {"id": user.id, "email": user.email, "name": user.name, "role": user.role},
         "accessToken": access_token
     }
 
@@ -120,6 +129,7 @@ def get_me(current_user: User = Depends(get_current_user)):
         "linkedinUrl": current_user.linkedinUrl,
         "githubUrl": current_user.githubUrl,
         "profilePhoto": current_user.profilePhoto,
+        "role": current_user.role,
         "createdAt": current_user.createdAt,
         "updatedAt": current_user.updatedAt,
     }

@@ -23,6 +23,7 @@ class User(Base):
     linkedinUrl = Column(String(191), nullable=True)
     githubUrl = Column(String(191), nullable=True)
     profilePhoto = Column(String(191), nullable=True)
+    role = Column(String(50), default="student", nullable=False)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
     updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -32,6 +33,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     commentUpvotes = relationship("CommentUpvote", back_populates="user")
     reviews = relationship("Review", back_populates="user")
+    notifications = relationship("Notification", back_populates="user")
+    certificates = relationship("Certificate", back_populates="user")
+    purchases = relationship("Purchase", back_populates="user")
 
 class Subject(Base):
     __tablename__ = "Subject"
@@ -52,6 +56,9 @@ class Subject(Base):
     sections = relationship("Section", back_populates="subject")
     enrollments = relationship("Enrollment", back_populates="subject")
     reviews = relationship("Review", back_populates="subject")
+    certificates = relationship("Certificate", back_populates="subject")
+    purchases = relationship("Purchase", back_populates="subject")
+    price = Column(Integer, default=0, nullable=False)
 
 class Section(Base):
     __tablename__ = "Section"
@@ -179,3 +186,43 @@ class Review(Base):
     subject = relationship("Subject", back_populates="reviews")
 
     __table_args__ = (UniqueConstraint('subjectId', 'userId', name='Review_subjectId_userId_key'),)
+
+class Notification(Base):
+    __tablename__ = "Notification"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    type = Column(String(50), nullable=False)
+    message = Column(String(300), nullable=False)
+    is_read = Column(Boolean, default=False, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", back_populates="notifications")
+
+class Certificate(Base):
+    __tablename__ = "Certificate"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    issuedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
+    certificateCode = Column(String(191), nullable=False)
+
+    user = relationship("User", back_populates="certificates")
+    subject = relationship("Subject", back_populates="certificates")
+
+class Purchase(Base):
+    __tablename__ = "Purchase"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    amount = Column(Integer, nullable=False)
+    razorpayOrderId = Column(String(191), nullable=True)
+    razorpayPaymentId = Column(String(191), nullable=True)
+    razorpaySignature = Column(String(191), nullable=True)
+    status = Column(String(50), default="pending", nullable=False)
+    purchasedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", back_populates="purchases")
+    subject = relationship("Subject", back_populates="purchases")

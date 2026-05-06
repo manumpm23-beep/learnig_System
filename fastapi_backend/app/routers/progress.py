@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from ..database import get_db
-from ..models import User, VideoProgress, Subject, Section, Video, Enrollment
+from ..models import User, VideoProgress, Subject, Section, Video, Enrollment, Certificate, Notification
 from ..auth import get_current_user
 from ..schemas import VideoProgressUpdate
+import uuid
 
 router = APIRouter()
 
@@ -72,5 +73,52 @@ def upsert_video_progress(videoId: str, progress_in: VideoProgressUpdate, curren
         
     db.commit()
     db.refresh(progress)
+
+    # Certificate Logic
+    if progress_in.isCompleted:
+        # Find subject of the video
+        video = db.query(Video).filter(Video.id == videoId).first()
+        if video:
+            section = db.query(Section).filter(Section.id == video.sectionId).first()
+            if section:
+                subject_id = section.subjectId
+                
+                total_videos = db.query(func.count(Video.id)).join(Section).filter(Section.subjectId == subject_id).scalar()
+                completed_videos = db.query(func.count(VideoProgress.id)).join(Video).join(Section).filter(
+                    VideoProgress.userId == current_user.id,
+                    Section.subjectId == subject_id,
+                    VideoProgress.isCompleted == True
+                ).scalar()
+
+                if total_videos > 0 and completed_videos >= total_videos:
+                    # Check if certificate exists
+                    existing_cert = db.query(Certificate).filter(
+                        Certificate.userId == current_user.id,
+                        Certificate.subjectId == subject_id
+                    ).first()
+                    
+                    if not existing_cert:
+                        # Create certificate
+                        count_certs = db.query(func.count(Certificate.id)).scalar() or 0
+                        cert_code = f"LP-{datetime.utcnow().year}-{(count_certs + 1):04d}"
+                        
+                        cert = Certificate(
+                            userId=current_user.id,
+                            subjectId=subject_id,
+                            certificateCode=cert_code
+                        )
+                        db.add(cert)
+                        
+                        subject = db.query(Subject).filter(Subject.id == subject_id).first()
+                        subj_title = subject.title if subject else "a course"
+                        
+                        notif = Notification(
+                            userId=current_user.id,
+                            type="achievement_unlocked",
+                            message=f"Congratulations! You've earned a certificate for {subj_title}."
+                        )
+                        db.add(notif)
+                        
+                        db.commit()
 
     return {"message": "Progress updated successfully"}

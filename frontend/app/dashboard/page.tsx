@@ -185,7 +185,7 @@ export default function DashboardPage() {
             </Link>
             {lastActiveCourse && (
               <Link 
-                href={lastActiveCourse.lastWatchedVideoId ? `/subjects/${lastActiveCourse.slug}/video/${lastActiveCourse.lastWatchedVideoId}` : `/subjects/${lastActiveCourse.slug}`}
+                href={lastActiveCourse.lastWatchedVideoId ? `/subjects/${lastActiveCourse.subjectId}/video/${lastActiveCourse.lastWatchedVideoId}` : `/subjects/${lastActiveCourse.subjectId}`}
                 className="px-5 py-2.5 bg-[#7F77DD] text-white text-sm font-bold rounded-lg hover:bg-[#6c65bd] transition-colors flex items-center gap-2 shadow-[0_0_20px_rgba(127,119,221,0.3)]"
               >
                 Resume learning <PlayCircle className="w-4 h-4" />
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-[#7F77DD]">{Math.round(course.percentComplete || 0)}%</span>
                           <Link 
-                            href={course.lastWatchedVideoId ? `/subjects/${course.slug}/video/${course.lastWatchedVideoId}` : `/subjects/${course.slug}`}
+                            href={course.lastWatchedVideoId ? `/subjects/${course.subjectId}/video/${course.lastWatchedVideoId}` : `/subjects/${course.subjectId}`}
                             className="px-3 py-1.5 bg-[#7F77DD]/10 text-[#7F77DD] text-xs font-bold rounded hover:bg-[#7F77DD]/20 transition-colors"
                           >
                             {course.lastWatchedVideoId ? 'Continue' : 'Start'}

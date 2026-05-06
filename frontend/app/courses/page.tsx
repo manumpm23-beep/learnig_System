@@ -353,7 +353,7 @@ export default function CoursesCatalogPage() {
                               <div className="h-full bg-[#7F77DD] rounded-full" style={{ width: `${percentComplete}%` }} />
                             </div>
                             <Link 
-                              href={lastVideo === 'enrolled_but_no_video_yet' ? `/subjects/${course.slug}` : `/subjects/${course.slug}/video/${lastVideo}`}
+                              href={lastVideo === 'enrolled_but_no_video_yet' ? `/subjects/${course.id}` : `/subjects/${course.id}/video/${lastVideo}`}
                               className="w-full py-2.5 bg-[#7F77DD]/10 text-[#7F77DD] text-sm font-bold rounded-lg border border-[#7F77DD]/20 hover:bg-[#7F77DD]/20 transition-colors flex items-center justify-center gap-2"
                             >
                               Continue learning <ArrowRight className="w-4 h-4" />

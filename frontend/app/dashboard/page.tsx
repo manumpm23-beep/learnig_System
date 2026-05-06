@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/apiClient';
 import { 
-  Rocket, Bell, BookOpen, CheckCircle, Clock, Flame, 
+  BookOpen, CheckCircle, Clock, Flame, 
   BarChart2, Play, Activity, Sparkles, Trophy, UserPlus, 
-  Award, ArrowRight, PlayCircle, Star
+  Award, PlayCircle, Star
 } from 'lucide-react';
 import Navbar from '@/components/Layout/Navbar';
 

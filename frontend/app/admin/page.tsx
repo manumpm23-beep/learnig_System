@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/apiClient';
 import Navbar from '@/components/Layout/Navbar';
 import { 
   LayoutDashboard, BookOpen, UploadCloud, Users, 
-  CreditCard, Award, Tag, Settings, Trash, Edit, Check, X
+  CreditCard, Award, Tag, Settings, Trash, Edit
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -47,6 +47,7 @@ export default function AdminPage() {
     if (user?.role === 'admin') {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, router]);
 
   const loadData = async () => {

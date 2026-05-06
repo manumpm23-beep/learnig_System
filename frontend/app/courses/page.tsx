@@ -7,8 +7,8 @@ import { apiClient } from '@/lib/apiClient';
 import { useAuthStore } from '@/store/authStore';
 import toast, { Toaster } from 'react-hot-toast';
 import { 
-  Search, LayoutGrid, List, BookOpen, Star, 
-  Rocket, Database, Layers, Monitor, PenTool, LayoutTemplate,
+  Search, LayoutGrid, List, Star, 
+  Database, Layers, Monitor, PenTool, LayoutTemplate,
   CheckCircle, Clock, Bookmark, Play, ArrowRight
 } from 'lucide-react';
 import Navbar from '@/components/Layout/Navbar';

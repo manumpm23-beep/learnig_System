@@ -39,6 +39,7 @@ export default function Navbar() {
     if (isAuthenticated) {
       loadNotifications();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   useEffect(() => {

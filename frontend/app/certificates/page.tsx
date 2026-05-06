@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/apiClient';
 import Navbar from '@/components/Layout/Navbar';
-import { Award, Lock, Download, Linkedin, Link2, CheckCircle } from 'lucide-react';
+import { Award, Lock, Download, Linkedin, Link2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function CertificatesPage() {
@@ -164,7 +164,7 @@ export default function CertificatesPage() {
                         <Download className="w-4 h-4" /> Download PDF
                       </button>
                       <button 
-                        onClick={() => handleLinkedInShare(cert.certificate_code)}
+                        onClick={() => handleLinkedInShare(cert?.certificate_code || '')}
                         className="flex-1 py-3 bg-[#0077b5] text-white text-sm font-bold rounded-lg hover:bg-[#006097] transition-colors flex items-center justify-center gap-2 shadow-lg"
                       >
                         <Linkedin className="w-4 h-4" /> Add to Profile

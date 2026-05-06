@@ -49,7 +49,7 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       const [userRes, subjectsRes] = await Promise.all([
-        apiClient.get('/api/users/me'),
+        apiClient.get('/api/auth/me'),
         apiClient.get('/api/subjects?pageSize=100')
       ]);
       
@@ -95,7 +95,7 @@ export default function ProfilePage() {
       const payload: any = { ...formData };
       if (!payload.dateOfBirth) delete payload.dateOfBirth;
 
-      await apiClient.put('/api/users/me', payload);
+      await apiClient.put('/api/auth/me', payload);
       toast.success('Profile updated successfully!');
       loadData(); // Refresh data
     } catch (e) {

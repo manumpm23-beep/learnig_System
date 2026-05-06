@@ -22,6 +22,10 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      console.log("Attempting login...");
+      console.log("API URL configured as:", process.env.NEXT_PUBLIC_API_BASE_URL);
+      console.log("Actual apiClient baseURL:", apiClient.defaults.baseURL);
+      
       const response = await apiClient.post('/api/auth/login', {
         email,
         password,

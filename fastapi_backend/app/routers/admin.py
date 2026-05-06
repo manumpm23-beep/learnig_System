@@ -70,16 +70,41 @@ def create_course(course: CourseCreate, db: Session = Depends(get_db), current_u
         slug = f"{base_slug}-{counter}"
         counter += 1
 
+    # Safely truncate thumbnail URL to prevent database DataError
+    safe_thumbnail = course.thumbnail_url[:190] if course.thumbnail_url else None
+
     new_course = Subject(
         title=course.title,
         slug=slug,
         description=course.description,
-        thumbnailUrl=course.thumbnail_url,
+        thumbnailUrl=safe_thumbnail,
         category=course.subject,
         isPublished=False,
         price=course.price
     )
     db.add(new_course)
+    db.flush() # flush to get new_course.id
+
+    if course.youtube_url:
+        from ..models import Section, Video
+        # Create a default section
+        new_section = Section(
+            subjectId=new_course.id,
+            title="Introduction",
+            orderIndex=1
+        )
+        db.add(new_section)
+        db.flush()
+
+        # Create the video
+        new_video = Video(
+            sectionId=new_section.id,
+            title=course.title,
+            youtubeUrl=course.youtube_url,
+            orderIndex=1
+        )
+        db.add(new_video)
+
     db.commit()
     db.refresh(new_course)
     return new_course

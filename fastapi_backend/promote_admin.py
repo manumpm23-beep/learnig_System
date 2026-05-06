@@ -31,12 +31,14 @@ try:
     # 3. Promote the user
     with engine.begin() as conn:
         # Get the first user to make them admin (or change this if you want a specific email)
-        result = conn.execute(text("SELECT email FROM User LIMIT 1")).fetchone()
+        email = 'manumpm23@gmail.com'
+        
+        # Check if user exists
+        result = conn.execute(text("SELECT email FROM User WHERE email = :email"), {"email": email}).fetchone()
         
         if not result:
-            print("No users found in the database. Please register an account first.")
+            print(f"User '{email}' not found. Please register an account with this email first.")
         else:
-            email = result[0]
             conn.execute(text("UPDATE User SET role = 'admin' WHERE email = :email"), {"email": email})
             print(f"Success! The account '{email}' has been promoted to Admin.")
             

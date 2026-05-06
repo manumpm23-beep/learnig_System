@@ -190,8 +190,8 @@ class Review(Base):
 class Notification(Base):
     __tablename__ = "Notification"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     type = Column(String(50), nullable=False)
     message = Column(String(300), nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)
@@ -202,9 +202,9 @@ class Notification(Base):
 class Certificate(Base):
     __tablename__ = "Certificate"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
-    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    subjectId = Column(String(191), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
     issuedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
     certificateCode = Column(String(191), nullable=False)
 
@@ -214,9 +214,9 @@ class Certificate(Base):
 class Purchase(Base):
     __tablename__ = "Purchase"
 
-    id = Column(String(36), primary_key=True, default=generate_uuid)
-    userId = Column(String(36), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
-    subjectId = Column(String(36), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(191), primary_key=True, default=generate_uuid)
+    userId = Column(String(191), ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    subjectId = Column(String(191), ForeignKey("Subject.id", ondelete="CASCADE"), nullable=False)
     amount = Column(Integer, nullable=False)
     razorpayOrderId = Column(String(191), nullable=True)
     razorpayPaymentId = Column(String(191), nullable=True)

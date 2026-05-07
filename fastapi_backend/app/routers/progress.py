@@ -57,7 +57,8 @@ def upsert_video_progress(videoId: str, progress_in: VideoProgressUpdate, curren
     ).first()
     
     if progress:
-        progress.lastPositionSeconds = progress_in.lastPositionSeconds
+        if progress_in.lastPositionSeconds is not None:
+            progress.lastPositionSeconds = progress_in.lastPositionSeconds
         if progress_in.isCompleted and not progress.isCompleted:
             progress.isCompleted = True
             progress.completedAt = datetime.utcnow()
@@ -65,8 +66,8 @@ def upsert_video_progress(videoId: str, progress_in: VideoProgressUpdate, curren
         progress = VideoProgress(
             userId=current_user.id,
             videoId=videoId,
-            lastPositionSeconds=progress_in.lastPositionSeconds,
-            isCompleted=progress_in.isCompleted,
+            lastPositionSeconds=progress_in.lastPositionSeconds or 0,
+            isCompleted=bool(progress_in.isCompleted),
             completedAt=datetime.utcnow() if progress_in.isCompleted else None
         )
         db.add(progress)

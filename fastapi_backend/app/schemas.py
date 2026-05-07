@@ -102,5 +102,7 @@ class ReviewCreate(BaseModel):
     review: Optional[str] = None
 
 class VideoProgressUpdate(BaseModel):
-    lastPositionSeconds: int
-    isCompleted: bool
+    # Frontend updates these independently (heartbeat progress vs completion),
+    # so both must be optional with safe defaults.
+    lastPositionSeconds: Optional[int] = 0
+    isCompleted: Optional[bool] = False

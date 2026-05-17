@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import YouTube, { YouTubeProps } from 'react-youtube';
+import dynamic from 'next/dynamic';
+import type { YouTubeProps } from 'react-youtube';
+
+const YouTube = dynamic(() => import('react-youtube'), { 
+    ssr: false,
+    loading: () => <div className="w-full h-full flex items-center justify-center bg-[#1a1a24] text-white/50">Loading video player...</div>
+});
 
 interface VideoPlayerProps {
     videoId: string;

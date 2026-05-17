@@ -30,10 +30,24 @@ def get_subject_reviews(subjectId: str, page: int = Query(1), limit: int = Query
             }
         })
 
+    all_reviews = query.all()
+    sum_rating = 0
+    rating_breakdown = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
+    
+    for r in all_reviews:
+        sum_rating += r.rating
+        key = str(r.rating)
+        if key in rating_breakdown:
+            rating_breakdown[key] += 1
+            
+    average_rating = round(sum_rating / total_count, 1) if total_count > 0 else 0
+
     import math
     return {
-        "data": response_data,
-        "totalCount": total_count,
+        "reviews": response_data,
+        "averageRating": average_rating,
+        "totalReviews": total_count,
+        "ratingBreakdown": rating_breakdown,
         "currentPage": page,
         "totalPages": math.ceil(total_count / limit) if limit > 0 else 0
     }

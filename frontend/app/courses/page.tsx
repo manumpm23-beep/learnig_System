@@ -73,6 +73,20 @@ export default function CoursesCatalogPage() {
 
   const handlePayment = async (course: any) => {
     try {
+      const isLoaded = await new Promise((resolve) => {
+        if ((window as any).Razorpay) return resolve(true);
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      });
+      
+      if (!isLoaded) {
+        toast.error("Failed to load Razorpay SDK. Check your connection.");
+        return;
+      }
+
       const { data } = await apiClient.post('/api/payments/create-order', { course_id: course.id });
       
       const options = {
@@ -166,8 +180,6 @@ export default function CoursesCatalogPage() {
   return (
     <div className="min-h-screen bg-[#0d0d14] font-sans selection:bg-[#7F77DD]/30 flex flex-col overflow-hidden h-screen">
       <Toaster position="top-right" />
-      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-      
       {/* Navbar */}
       <Navbar />
 

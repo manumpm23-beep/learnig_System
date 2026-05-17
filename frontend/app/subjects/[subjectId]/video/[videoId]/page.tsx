@@ -8,6 +8,7 @@ import { useSidebarStore } from '@/store/sidebarStore';
 import { useAuthStore } from '@/store/authStore';
 import VideoPlayer from '@/components/Video/VideoPlayer';
 import CourseReviews from '@/components/Video/CourseReviews';
+import LoadingScreen from '@/components/LoadingScreen';
 import { 
   Trophy, Search, Star, MessageCircle, PlayCircle, 
   ChevronDown, ChevronUp, CheckCircle2, Lock, 
@@ -359,7 +360,7 @@ export default function VideoLessonPage({ params }: { params: { subjectId: strin
   const pct = tot > 0 ? Math.round((compiled / tot) * 100) : 0;
 
   if (loading || !video) {
-    return <div className="flex h-screen items-center justify-center bg-[#0d0d14]"><Loader2 className="w-10 h-10 text-[#7F77DD] animate-spin" /></div>;
+    return <LoadingScreen />;
   }
 
   const isCurrentCompleted = progress?.isCompleted || (tree?.sections.some(s => s.videos.find(v => v.id === videoId && v.isCompleted)));

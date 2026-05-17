@@ -9,7 +9,7 @@ import {
   User, BookOpen, Award, Lock, Bell, 
   MapPin, Pencil, Shield, Check, Camera,
   LogOut, Share, Github, Linkedin, Laptop, AlertTriangle,
-  PlayCircle, CheckCircle, ArrowRight, Home
+  PlayCircle, CheckCircle, ArrowRight, Home, Download
 } from 'lucide-react';
 import Navbar from '@/components/Layout/Navbar';
 import toast, { Toaster } from 'react-hot-toast';
@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
   const [profileData, setProfileData] = useState<any>(null);
   const [progressData, setProgressData] = useState<any[]>([]);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states
@@ -48,9 +49,10 @@ export default function ProfilePage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [userRes, subjectsRes] = await Promise.all([
+      const [userRes, subjectsRes, certRes] = await Promise.all([
         apiClient.get('/api/auth/me'),
-        apiClient.get('/api/subjects?pageSize=100')
+        apiClient.get('/api/subjects?pageSize=100'),
+        apiClient.get('/api/certificates'),
       ]);
       
       const userData = userRes.data.user;
@@ -79,6 +81,7 @@ export default function ProfilePage() {
       const results = await Promise.all(promises);
       const activeCourses = results.filter(r => r.progress && r.progress.totalVideos > 0);
       setProgressData(activeCourses);
+      setCertificates(certRes.data || []);
 
     } catch (e) {
       console.error(e);
@@ -87,6 +90,22 @@ export default function ProfilePage() {
       setLoading(false);
     }
   };
+
+  // If user completes a course while this page is open, auto-refresh certificates.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const certRes = await apiClient.get('/api/certificates');
+        setCertificates(certRes.data || []);
+      } catch {
+        // ignore network/authorization errors during polling
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -100,6 +119,25 @@ export default function ProfilePage() {
       loadData(); // Refresh data
     } catch (e) {
       toast.error('Failed to update profile');
+    }
+  };
+
+  const handleDownloadCertificate = async (courseId: string) => {
+    try {
+      const res = await apiClient.get(`/api/certificates/${courseId}/download`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Certificate_${courseId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      toast.success('Certificate downloaded successfully!');
+    } catch (e) {
+      toast.error('Failed to download certificate. Ensure reportlab is installed.');
     }
   };
 
@@ -208,7 +246,7 @@ export default function ProfilePage() {
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xl font-medium text-white">0</div>
+              <div className="text-xl font-medium text-white">{certificates.length}</div>
               <div className="text-[11px] text-white/30 mt-0.5">Certificates</div>
             </div>
           </div>
@@ -438,10 +476,55 @@ export default function ProfilePage() {
           )}
 
           {activeTab === 'certs' && (
-            <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-5 text-center py-16">
-              <Award className="w-12 h-12 text-white/10 mx-auto mb-4" />
-              <h3 className="text-[15px] font-medium text-white mb-1">No certificates yet</h3>
-              <p className="text-[13px] text-white/30">Complete a course to earn your first certificate.</p>
+            <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[13px] font-medium text-white flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#AFA9EC]" /> Certificates
+                </h3>
+                <span className="text-[11px] text-white/30">{certificates.length} unlocked</span>
+              </div>
+
+              {certificates.length === 0 ? (
+                <div className="text-center py-16">
+                  <Award className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                  <h3 className="text-[15px] font-medium text-white mb-1">No certificates yet</h3>
+                  <p className="text-[13px] text-white/30">Complete a course to earn your first certificate.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {certificates.map((cert: any) => (
+                    <div
+                      key={cert.id || cert.course_id}
+                      className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="text-[12px] text-white/30 uppercase tracking-wider mb-1">
+                            {cert.course_title || 'Course'}
+                          </div>
+                          <div className="text-[14px] font-bold text-white truncate">
+                            Certificate Code: <span className="font-mono">{cert.certificate_code}</span>
+                          </div>
+                          <div className="text-[12px] text-white/40 mt-1">
+                            Issued:{' '}
+                            {cert.issued_at
+                              ? new Date(cert.issued_at).toLocaleDateString()
+                              : 'N/A'}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleDownloadCertificate(cert.course_id)}
+                          className="px-3 py-2 bg-[#7F77DD] text-white text-xs font-bold rounded-lg hover:bg-[#6c65bd] transition-colors shrink-0"
+                        >
+                          <Download className="w-4 h-4 inline-block mr-2 align-[-2px]" />
+                          Download PDF
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

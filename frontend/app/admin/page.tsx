@@ -30,8 +30,8 @@ export default function AdminPage() {
     difficulty: 'Beginner',
     price: 0,
     description: '',
-    youtube_url: '',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    videos: [{ title: '', youtube_url: '' }]
   });
 
   useEffect(() => {
@@ -70,14 +70,45 @@ export default function AdminPage() {
     }
   };
 
+  const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, thumbnail_url: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddVideo = () => {
+    setFormData(prev => ({
+      ...prev,
+      videos: [...prev.videos, { title: '', youtube_url: '' }]
+    }));
+  };
+
+  const handleVideoChange = (index: number, field: 'title' | 'youtube_url', value: string) => {
+    const updatedVideos = [...formData.videos];
+    updatedVideos[index][field] = value;
+    setFormData(prev => ({ ...prev, videos: updatedVideos }));
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    const updatedVideos = formData.videos.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, videos: updatedVideos }));
+  };
+
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiClient.post('/api/admin/courses', formData);
+      // Filter out empty videos
+      const validVideos = formData.videos.filter(v => v.title.trim() && v.youtube_url.trim());
+      await apiClient.post('/api/admin/courses', { ...formData, videos: validVideos });
       toast.success("Course published successfully!");
       setFormData({
         title: '', subject: 'Frontend', difficulty: 'Beginner', 
-        price: 0, description: '', youtube_url: '', thumbnail_url: ''
+        price: 0, description: '', thumbnail_url: '', videos: [{ title: '', youtube_url: '' }]
       });
       loadData();
       setActiveTab('Courses');
@@ -331,25 +362,75 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-white/70 mb-2">YouTube Embed URL</label>
-                    <input 
-                      type="url" 
-                      value={formData.youtube_url}
-                      onChange={e => setFormData({...formData, youtube_url: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#7F77DD]/50" 
-                      placeholder="https://www.youtube.com/embed/..."
-                    />
+                    <label className="block text-sm font-bold text-white/70 mb-2">Thumbnail</label>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleThumbnailUpload}
+                          className="text-sm text-white/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#7F77DD]/10 file:text-[#7F77DD] hover:file:bg-[#7F77DD]/20 cursor-pointer" 
+                        />
+                        <span className="text-white/40 text-xs font-bold">OR</span>
+                        <input 
+                          type="url" 
+                          value={formData.thumbnail_url}
+                          onChange={e => setFormData({...formData, thumbnail_url: e.target.value})}
+                          className="flex-1 bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-[#7F77DD]/50 text-sm" 
+                          placeholder="Paste image URL..."
+                        />
+                      </div>
+                      {formData.thumbnail_url && (
+                        <div className="w-32 h-20 bg-black/50 border border-white/10 rounded-lg overflow-hidden relative">
+                          <img src={formData.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-bold text-white/70 mb-2">Thumbnail URL</label>
-                    <input 
-                      type="url" 
-                      value={formData.thumbnail_url}
-                      onChange={e => setFormData({...formData, thumbnail_url: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#7F77DD]/50" 
-                      placeholder="https://..."
-                    />
+                  <div className="border-t border-white/10 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <label className="block text-sm font-bold text-white/70">Course Videos (Playlist)</label>
+                      <button 
+                        type="button" 
+                        onClick={handleAddVideo}
+                        className="text-xs font-bold text-[#7F77DD] hover:text-white transition-colors bg-[#7F77DD]/10 px-3 py-1.5 rounded-full"
+                      >
+                        + Add Video
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {formData.videos.map((vid, index) => (
+                        <div key={index} className="flex flex-col md:flex-row gap-3 bg-white/[0.02] p-4 rounded-xl border border-white/5 relative">
+                          <div className="flex-1">
+                            <input 
+                              type="text" 
+                              value={vid.title}
+                              onChange={e => handleVideoChange(index, 'title', e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2.5 mb-2 focus:outline-none focus:border-[#7F77DD]/50 text-sm" 
+                              placeholder={`Video ${index + 1} Title (e.g. Introduction)`}
+                            />
+                            <input 
+                              type="url" 
+                              value={vid.youtube_url}
+                              onChange={e => handleVideoChange(index, 'youtube_url', e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7F77DD]/50 text-sm" 
+                              placeholder="YouTube URL"
+                            />
+                          </div>
+                          {formData.videos.length > 1 && (
+                            <button 
+                              type="button"
+                              onClick={() => handleRemoveVideo(index)}
+                              className="md:self-center p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors shrink-0"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-white/10 flex justify-end gap-3">

@@ -73,7 +73,8 @@ def get_subjects(
             "totalReviews": total_reviews,
             "totalVideos": total_videos,
             "totalDuration": total_duration,
-            "createdAt": sub.createdAt
+            "createdAt": sub.createdAt,
+            "price": sub.price
         })
     
     return {
@@ -117,7 +118,8 @@ def get_subject_by_id(subjectId: str, db: Session = Depends(get_db)):
         "updatedAt": sub.updatedAt,
         "averageRating": avg_rating,
         "totalReviews": total_reviews,
-        "ratingBreakdown": rating_breakdown
+        "ratingBreakdown": rating_breakdown,
+        "price": sub.price
     }
 
 @router.get("/{subjectId}/tree")

@@ -383,15 +383,7 @@ export default function CoursesCatalogPage() {
                           <p className="text-white/50 text-sm line-clamp-2 mb-4 leading-relaxed">
                             {course.description || 'A comprehensive overview designed to build your core skills step by step through interactive video learning.'}
                           </p>
-                          <div className="flex items-center gap-3 mb-5">
-                            <div className="flex items-center gap-1.5">
-                              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                              <span className="text-white text-xs font-bold">{course.averageRating ? Number(course.averageRating).toFixed(1) : '0.0'}</span>
-                              <span className="text-white/40 text-xs">({course.totalReviews || 0})</span>
-                            </div>
-                            <span className="text-white/20 text-xs">•</span>
-                            <span className="text-white/50 text-xs font-medium">24 lessons (12h)</span>
-                          </div>
+                          {/* Removed inaccurate rating and lessons info */}
                         </div>
 
                         {isEnrolled ? (
@@ -418,7 +410,13 @@ export default function CoursesCatalogPage() {
                               <span className="text-white font-bold text-lg">₹{course.price}</span>
                             )}
                             <button 
-                              onClick={() => handleEnroll(course)}
+                              onClick={() => {
+                                if (course.price > 0) {
+                                  router.push(`/checkout/${course.id}`);
+                                } else {
+                                  handleEnroll(course);
+                                }
+                              }}
                               className="px-6 py-2.5 bg-white/[0.04] text-white hover:text-white text-sm font-bold rounded-lg border border-white/[0.08] hover:bg-white/[0.1] hover:border-white/[0.15] transition-all"
                             >
                               {course.price > 0 ? "Buy now" : "Enroll now"}

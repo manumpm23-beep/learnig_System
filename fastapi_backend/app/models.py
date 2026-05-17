@@ -44,7 +44,7 @@ class Subject(Base):
     title = Column(String(191), nullable=False)
     slug = Column(String(191), unique=True, nullable=False)
     description = Column(Text, nullable=True)
-    thumbnailUrl = Column(String(191), nullable=True)
+    thumbnailUrl = Column(Text, nullable=True)
     instructorName = Column(String(191), nullable=True)
     instructorPhoto = Column(String(191), nullable=True)
     category = Column(String(191), nullable=True)

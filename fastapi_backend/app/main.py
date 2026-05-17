@@ -25,6 +25,12 @@ async def lifespan(app: FastAPI):
             conn.execute(text("ALTER TABLE Subject ADD COLUMN price INT DEFAULT 0 NOT NULL;"))
     except Exception:
         pass
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE Subject MODIFY thumbnailUrl LONGTEXT;"))
+    except Exception:
+        pass
     
     # Create all tables
     Base.metadata.create_all(bind=engine)

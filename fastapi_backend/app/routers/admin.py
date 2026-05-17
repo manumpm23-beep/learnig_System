@@ -35,14 +35,20 @@ def get_stats(db: Session = Depends(get_db), current_user: User = Depends(requir
         "completion_rate": 85 # Mocked for now
     }
 
+from typing import List
+
+class VideoCreate(BaseModel):
+    title: str
+    youtube_url: str
+
 class CourseCreate(BaseModel):
     title: str
     description: str = ""
     subject: str = "Frontend"
     difficulty: str = "Beginner"
     price: int = 0
-    youtube_url: str = ""
     thumbnail_url: str = ""
+    videos: List[VideoCreate] = []
 
 @router.get("/courses")
 def get_courses(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
@@ -70,14 +76,11 @@ def create_course(course: CourseCreate, db: Session = Depends(get_db), current_u
         slug = f"{base_slug}-{counter}"
         counter += 1
 
-    # Safely truncate thumbnail URL to prevent database DataError
-    safe_thumbnail = course.thumbnail_url[:190] if course.thumbnail_url else None
-
     new_course = Subject(
         title=course.title,
         slug=slug,
         description=course.description,
-        thumbnailUrl=safe_thumbnail,
+        thumbnailUrl=course.thumbnail_url,
         category=course.subject,
         isPublished=False,
         price=course.price
@@ -85,25 +88,26 @@ def create_course(course: CourseCreate, db: Session = Depends(get_db), current_u
     db.add(new_course)
     db.flush() # flush to get new_course.id
 
-    if course.youtube_url:
+    if len(course.videos) > 0:
         from ..models import Section, Video
         # Create a default section
         new_section = Section(
             subjectId=new_course.id,
-            title="Introduction",
+            title="Course Videos",
             orderIndex=1
         )
         db.add(new_section)
         db.flush()
 
-        # Create the video
-        new_video = Video(
-            sectionId=new_section.id,
-            title=course.title,
-            youtubeUrl=course.youtube_url,
-            orderIndex=1
-        )
-        db.add(new_video)
+        # Create multiple videos
+        for i, vid in enumerate(course.videos):
+            new_video = Video(
+                sectionId=new_section.id,
+                title=vid.title,
+                youtubeUrl=vid.youtube_url,
+                orderIndex=i + 1
+            )
+            db.add(new_video)
 
     db.commit()
     db.refresh(new_course)

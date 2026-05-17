@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import type { YouTubeProps } from 'react-youtube';
 
-const YouTube = dynamic(() => import('react-youtube'), { 
+const YouTube: any = dynamic(() => import('react-youtube'), { 
     ssr: false
 });
 

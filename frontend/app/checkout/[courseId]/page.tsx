@@ -142,7 +142,7 @@ export default function CheckoutPage({ params }: { params: { courseId: string } 
             <h2 className="text-lg font-bold text-white mb-4">Order Summary</h2>
             
             <div className="flex gap-4 mb-6 pb-6 border-b border-white/10">
-              <div className="w-32 h-20 bg-slate-900 rounded-lg bg-cover bg-center shrink-0 border border-white/10" style={{ backgroundImage: course.thumbnailUrl ? \`url(\${course.thumbnailUrl})\` : '' }}></div>
+              <div className="w-32 h-20 bg-slate-900 rounded-lg bg-cover bg-center shrink-0 border border-white/10" style={{ backgroundImage: course.thumbnailUrl ? `url(${course.thumbnailUrl})` : '' }}></div>
               <div>
                 <h3 className="font-bold text-white text-lg leading-tight mb-1">{course.title}</h3>
                 <p className="text-white/50 text-sm">{course.category || 'Course'}</p>

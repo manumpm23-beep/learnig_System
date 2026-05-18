@@ -8,10 +8,12 @@ from pydantic import BaseModel
 import hmac
 import hashlib
 
+razorpay_import_error = None
 try:
     import razorpay
-except ImportError:
-    razorpay = None # Need user to install
+except Exception as e:
+    razorpay = None
+    razorpay_import_error = str(e)
 
 router = APIRouter()
 
@@ -42,7 +44,7 @@ def create_order(req: OrderRequest, db: Session = Depends(get_db), current_user:
         raise HTTPException(500, "Razorpay keys not configured")
         
     if not razorpay:
-        raise HTTPException(500, "razorpay module not installed")
+        raise HTTPException(500, f"razorpay module failed to load: {razorpay_import_error}")
 
     client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
     

@@ -142,7 +142,16 @@ export default function AdminPage() {
       setActiveTab('Courses');
     } catch (err: any) {
       console.error("Failed to save course", err);
-      const errorMessage = err.response?.data?.detail || "Failed to save course. Check console for details.";
+      let errorMessage = "Failed to save course. Check console for details.";
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0].msg || "Validation error";
+        } else if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        } else {
+          errorMessage = JSON.stringify(err.response.data.detail);
+        }
+      }
       toast.error(errorMessage);
     }
   };

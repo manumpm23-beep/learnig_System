@@ -140,8 +140,10 @@ export default function AdminPage() {
       setEditCourseId(null);
       loadData();
       setActiveTab('Courses');
-    } catch (e) {
-      toast.error("Failed to save course");
+    } catch (err: any) {
+      console.error("Failed to save course", err);
+      const errorMessage = err.response?.data?.detail || "Failed to save course. Check console for details.";
+      toast.error(errorMessage);
     }
   };
 

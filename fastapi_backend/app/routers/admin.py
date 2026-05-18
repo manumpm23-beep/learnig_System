@@ -159,9 +159,11 @@ def update_course(id: str, course_data: CourseCreate, db: Session = Depends(get_
         for v in videos:
             db.query(VideoProgress).filter(VideoProgress.videoId == v.id).delete(synchronize_session=False)
             comments = db.query(Comment).filter(Comment.videoId == v.id).all()
-            for c in comments:
-                db.query(CommentUpvote).filter(CommentUpvote.commentId == c.id).delete(synchronize_session=False)
-                db.delete(c)
+            comment_ids = [c.id for c in comments]
+            if comment_ids:
+                db.query(CommentUpvote).filter(CommentUpvote.commentId.in_(comment_ids)).delete(synchronize_session=False)
+                db.query(Comment).filter(Comment.videoId == v.id).update({"parentId": None}, synchronize_session=False)
+                db.query(Comment).filter(Comment.videoId == v.id).delete(synchronize_session=False)
             db.delete(v)
         db.delete(s)
         
@@ -183,7 +185,12 @@ def update_course(id: str, course_data: CourseCreate, db: Session = Depends(get_
             )
             db.add(new_video)
             
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Database error during update: {str(e)}")
+        
     return {"message": "Course updated"}
 
 class CourseStatusUpdate(BaseModel):
@@ -217,14 +224,21 @@ def delete_course(id: str, db: Session = Depends(get_db), current_user: User = D
         for video in videos:
             db.query(VideoProgress).filter(VideoProgress.videoId == video.id).delete(synchronize_session=False)
             comments = db.query(Comment).filter(Comment.videoId == video.id).all()
-            for c in comments:
-                db.query(CommentUpvote).filter(CommentUpvote.commentId == c.id).delete(synchronize_session=False)
-                db.delete(c)
+            comment_ids = [c.id for c in comments]
+            if comment_ids:
+                db.query(CommentUpvote).filter(CommentUpvote.commentId.in_(comment_ids)).delete(synchronize_session=False)
+                db.query(Comment).filter(Comment.videoId == video.id).update({"parentId": None}, synchronize_session=False)
+                db.query(Comment).filter(Comment.videoId == video.id).delete(synchronize_session=False)
             db.delete(video)
         db.delete(section)
         
-    db.delete(course)
-    db.commit()
+    try:
+        db.delete(course)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Database error during deletion: {str(e)}")
+        
     return {"message": "Course deleted"}
 
 @router.get("/students")

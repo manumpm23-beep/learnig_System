@@ -104,7 +104,16 @@ export default function CheckoutPage({ params }: { params: { courseId: string } 
       rzp.open();
     } catch (err: any) {
       console.error("Failed to create order", err);
-      const errorMessage = err.response?.data?.detail || "Failed to initiate payment. Check your Razorpay keys.";
+      let errorMessage = "Failed to initiate payment. Check your Razorpay keys.";
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        } else if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail[0].msg || "Validation error";
+        } else {
+          errorMessage = JSON.stringify(err.response.data.detail);
+        }
+      }
       toast.error(errorMessage);
       setIsProcessing(false);
     }

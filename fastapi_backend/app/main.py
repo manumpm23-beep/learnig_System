@@ -5,7 +5,9 @@ from .database import engine, Base
 from .routers import users, courses, videos, progress, dashboard, comments, ratings, notifications, certificates, admin, payments
 from dotenv import load_dotenv
 
-load_dotenv()
+# Explicitly load .env from the directory above the 'app' folder
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(dotenv_path=env_path)
 
 # We only create tables if they don't exist.
 from sqlalchemy import text

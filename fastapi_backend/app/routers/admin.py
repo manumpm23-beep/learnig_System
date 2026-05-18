@@ -151,15 +151,17 @@ def update_course(id: str, course_data: CourseCreate, db: Session = Depends(get_
     if course_data.thumbnail_url:
         course.thumbnailUrl = course_data.thumbnail_url
         
-    from ..models import Section, Video, VideoProgress, Comment
+    from ..models import Section, Video, VideoProgress, Comment, CommentUpvote
     
-    # Simple strategy: delete old videos and recreate them
     sections = db.query(Section).filter(Section.subjectId == id).all()
     for s in sections:
         videos = db.query(Video).filter(Video.sectionId == s.id).all()
         for v in videos:
-            db.query(VideoProgress).filter(VideoProgress.videoId == v.id).delete()
-            db.query(Comment).filter(Comment.videoId == v.id).delete()
+            db.query(VideoProgress).filter(VideoProgress.videoId == v.id).delete(synchronize_session=False)
+            comments = db.query(Comment).filter(Comment.videoId == v.id).all()
+            for c in comments:
+                db.query(CommentUpvote).filter(CommentUpvote.commentId == c.id).delete(synchronize_session=False)
+                db.delete(c)
             db.delete(v)
         db.delete(s)
         
@@ -202,19 +204,22 @@ def delete_course(id: str, db: Session = Depends(get_db), current_user: User = D
     if not course:
         raise HTTPException(404, "Course not found")
         
-    from ..models import Section, Video, Enrollment, Purchase, Certificate, Review, VideoProgress, Comment
+    from ..models import Section, Video, Enrollment, Purchase, Certificate, Review, VideoProgress, Comment, CommentUpvote
     
-    db.query(Enrollment).filter(Enrollment.subjectId == id).delete()
-    db.query(Purchase).filter(Purchase.subjectId == id).delete()
-    db.query(Certificate).filter(Certificate.subjectId == id).delete()
-    db.query(Review).filter(Review.subjectId == id).delete()
+    db.query(Enrollment).filter(Enrollment.subjectId == id).delete(synchronize_session=False)
+    db.query(Purchase).filter(Purchase.subjectId == id).delete(synchronize_session=False)
+    db.query(Certificate).filter(Certificate.subjectId == id).delete(synchronize_session=False)
+    db.query(Review).filter(Review.subjectId == id).delete(synchronize_session=False)
     
     sections = db.query(Section).filter(Section.subjectId == id).all()
     for section in sections:
         videos = db.query(Video).filter(Video.sectionId == section.id).all()
         for video in videos:
-            db.query(VideoProgress).filter(VideoProgress.videoId == video.id).delete()
-            db.query(Comment).filter(Comment.videoId == video.id).delete()
+            db.query(VideoProgress).filter(VideoProgress.videoId == video.id).delete(synchronize_session=False)
+            comments = db.query(Comment).filter(Comment.videoId == video.id).all()
+            for c in comments:
+                db.query(CommentUpvote).filter(CommentUpvote.commentId == c.id).delete(synchronize_session=False)
+                db.delete(c)
             db.delete(video)
         db.delete(section)
         

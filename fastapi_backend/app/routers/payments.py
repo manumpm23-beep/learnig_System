@@ -49,11 +49,14 @@ def create_order(req: OrderRequest, db: Session = Depends(get_db), current_user:
     # Amount in paise
     amount = course.price * 100
     
-    order = client.order.create({
-        "amount": amount,
-        "currency": "INR",
-        "payment_capture": 1
-    })
+    try:
+        order = client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "payment_capture": 1
+        })
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Razorpay Error: {str(e)}")
     
     # Save pending purchase
     purchase = Purchase(

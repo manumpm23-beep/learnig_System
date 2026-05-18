@@ -113,6 +113,77 @@ def create_course(course: CourseCreate, db: Session = Depends(get_db), current_u
     db.refresh(new_course)
     return new_course
 
+@router.get("/courses/{id}")
+def get_course(id: str, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    course = db.query(Subject).filter(Subject.id == id).first()
+    if not course:
+        raise HTTPException(404, "Course not found")
+        
+    from ..models import Section, Video
+    videos_res = []
+    sections = db.query(Section).filter(Section.subjectId == id).all()
+    for s in sections:
+        videos = db.query(Video).filter(Video.sectionId == s.id).order_by(Video.orderIndex).all()
+        for v in videos:
+            videos_res.append({"title": v.title, "youtube_url": v.youtubeUrl})
+            
+    return {
+        "id": course.id,
+        "title": course.title,
+        "description": course.description,
+        "subject": course.category,
+        "difficulty": "Beginner", 
+        "price": course.price,
+        "thumbnail_url": course.thumbnailUrl,
+        "videos": videos_res if len(videos_res) > 0 else [{"title": "", "youtube_url": ""}]
+    }
+
+@router.put("/courses/{id}")
+def update_course(id: str, course_data: CourseCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    course = db.query(Subject).filter(Subject.id == id).first()
+    if not course:
+        raise HTTPException(404, "Course not found")
+        
+    course.title = course_data.title
+    course.description = course_data.description
+    course.category = course_data.subject
+    course.price = course_data.price
+    if course_data.thumbnail_url:
+        course.thumbnailUrl = course_data.thumbnail_url
+        
+    from ..models import Section, Video, VideoProgress, Comment
+    
+    # Simple strategy: delete old videos and recreate them
+    sections = db.query(Section).filter(Section.subjectId == id).all()
+    for s in sections:
+        videos = db.query(Video).filter(Video.sectionId == s.id).all()
+        for v in videos:
+            db.query(VideoProgress).filter(VideoProgress.videoId == v.id).delete()
+            db.query(Comment).filter(Comment.videoId == v.id).delete()
+            db.delete(v)
+        db.delete(s)
+        
+    if len(course_data.videos) > 0:
+        new_section = Section(
+            subjectId=course.id,
+            title="Course Videos",
+            orderIndex=1
+        )
+        db.add(new_section)
+        db.flush()
+        
+        for i, vid in enumerate(course_data.videos):
+            new_video = Video(
+                sectionId=new_section.id,
+                title=vid.title,
+                youtubeUrl=vid.youtube_url,
+                orderIndex=i + 1
+            )
+            db.add(new_video)
+            
+    db.commit()
+    return {"message": "Course updated"}
+
 class CourseStatusUpdate(BaseModel):
     status: str
 
@@ -130,6 +201,23 @@ def delete_course(id: str, db: Session = Depends(get_db), current_user: User = D
     course = db.query(Subject).filter(Subject.id == id).first()
     if not course:
         raise HTTPException(404, "Course not found")
+        
+    from ..models import Section, Video, Enrollment, Purchase, Certificate, Review, VideoProgress, Comment
+    
+    db.query(Enrollment).filter(Enrollment.subjectId == id).delete()
+    db.query(Purchase).filter(Purchase.subjectId == id).delete()
+    db.query(Certificate).filter(Certificate.subjectId == id).delete()
+    db.query(Review).filter(Review.subjectId == id).delete()
+    
+    sections = db.query(Section).filter(Section.subjectId == id).all()
+    for section in sections:
+        videos = db.query(Video).filter(Video.sectionId == section.id).all()
+        for video in videos:
+            db.query(VideoProgress).filter(VideoProgress.videoId == video.id).delete()
+            db.query(Comment).filter(Comment.videoId == video.id).delete()
+            db.delete(video)
+        db.delete(section)
+        
     db.delete(course)
     db.commit()
     return {"message": "Course deleted"}

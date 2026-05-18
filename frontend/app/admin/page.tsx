@@ -33,6 +33,7 @@ export default function AdminPage() {
     thumbnail_url: '',
     videos: [{ title: '', youtube_url: '' }]
   });
+  const [editCourseId, setEditCourseId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -70,6 +71,25 @@ export default function AdminPage() {
     }
   };
 
+  const handleEditCourse = async (id: string) => {
+    try {
+      const { data } = await apiClient.get(`/api/admin/courses/${id}`);
+      setFormData({
+        title: data.title,
+        subject: data.subject,
+        difficulty: data.difficulty,
+        price: data.price,
+        description: data.description,
+        thumbnail_url: data.thumbnail_url,
+        videos: data.videos
+      });
+      setEditCourseId(id);
+      setActiveTab('Upload course');
+    } catch (e) {
+      toast.error("Failed to fetch course details");
+    }
+  };
+
   const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -104,16 +124,24 @@ export default function AdminPage() {
     try {
       // Filter out empty videos
       const validVideos = formData.videos.filter(v => v.title.trim() && v.youtube_url.trim());
-      await apiClient.post('/api/admin/courses', { ...formData, videos: validVideos });
-      toast.success("Course published successfully!");
+      
+      if (editCourseId) {
+        await apiClient.put(`/api/admin/courses/${editCourseId}`, { ...formData, videos: validVideos });
+        toast.success("Course updated successfully!");
+      } else {
+        await apiClient.post('/api/admin/courses', { ...formData, videos: validVideos });
+        toast.success("Course published successfully!");
+      }
+
       setFormData({
         title: '', subject: 'Frontend', difficulty: 'Beginner', 
         price: 0, description: '', thumbnail_url: '', videos: [{ title: '', youtube_url: '' }]
       });
+      setEditCourseId(null);
       loadData();
       setActiveTab('Courses');
     } catch (e) {
-      toast.error("Failed to publish course");
+      toast.error("Failed to save course");
     }
   };
 
@@ -277,7 +305,7 @@ export default function AdminPage() {
                           </button>
                         </td>
                         <td className="p-4 text-sm text-white/70 flex gap-2">
-                          <button className="p-2 bg-white/5 rounded text-white/50 hover:text-white transition-colors" title="Edit (Coming soon)">
+                          <button onClick={() => handleEditCourse(course.id)} className="p-2 bg-white/5 rounded text-white/50 hover:text-white transition-colors" title="Edit">
                             <Edit className="w-4 h-4" />
                           </button>
                           <button onClick={() => deleteCourse(course.id)} className="p-2 bg-red-500/10 rounded text-red-400 hover:bg-red-500/20 transition-colors" title="Delete">
@@ -294,7 +322,7 @@ export default function AdminPage() {
 
           {activeTab === 'Upload course' && (
             <div className="relative z-10 max-w-3xl mx-auto">
-              <h1 className="text-3xl font-bold text-white mb-8">Upload New Course</h1>
+              <h1 className="text-3xl font-bold text-white mb-8">{editCourseId ? 'Edit Course' : 'Upload New Course'}</h1>
               
               <form onSubmit={handleUploadSubmit} className="space-y-6">
                 <div className="bg-[#161820] border border-white/[0.08] p-8 rounded-2xl flex flex-col gap-5">

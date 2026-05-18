@@ -14,6 +14,7 @@ export default function CertificatesPage() {
 
   const [certificates, setCertificates] = useState<any[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,10 +25,12 @@ export default function CertificatesPage() {
 
     Promise.all([
       apiClient.get('/api/certificates'),
-      apiClient.get('/api/dashboard')
-    ]).then(([certRes, dashRes]) => {
+      apiClient.get('/api/dashboard'),
+      apiClient.get('/api/subjects?limit=100')
+    ]).then(([certRes, dashRes, coursesRes]) => {
       setCertificates(certRes.data);
       setEnrolledCourses(dashRes.data.enrolledCourses || []);
+      setAllCourses(coursesRes.data.data || []);
     }).catch(err => console.error(err))
       .finally(() => setLoading(false));
 
@@ -69,9 +72,6 @@ export default function CertificatesPage() {
     );
   }
 
-  // We want to show all enrolled courses. 
-  // If the course is in certificates list, it's unlocked. Else, locked.
-  
   return (
     <div className="min-h-screen bg-[#0d0d14] font-sans selection:bg-[#7F77DD]/30 flex flex-col">
       <Toaster position="top-right" />
@@ -82,27 +82,28 @@ export default function CertificatesPage() {
 
         <div className="mb-10 relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2 flex items-center gap-3">
-            <Award className="w-8 h-8 text-[#7F77DD]" /> My Certificates
+            <Award className="w-8 h-8 text-[#7F77DD]" /> Course Certificates
           </h1>
           <p className="text-white/50 text-sm md:text-base">
-            View and download your earned certificates for completed courses.
+            View all available certificates. Complete a course to unlock and download its certificate.
           </p>
         </div>
 
-        {enrolledCourses.length === 0 ? (
+        {allCourses.length === 0 ? (
           <div className="text-center py-20 bg-white/[0.02] border border-white/[0.05] rounded-xl relative z-10">
             <Award className="w-16 h-16 text-white/20 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">No certificates yet</h3>
-            <p className="text-white/50">Enroll in a course and complete it to earn your first certificate.</p>
+            <h3 className="text-xl font-bold text-white mb-2">No courses available</h3>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
-            {enrolledCourses.map((course: any) => {
-              const cert = certificates.find(c => c.course_id === course.subjectId);
+            {allCourses.map((course: any) => {
+              const cert = certificates.find(c => c.course_id === course.id);
               const isUnlocked = !!cert;
+              const enrolledData = enrolledCourses.find(c => c.subjectId === course.id);
+              const progress = enrolledData ? Math.round(enrolledData.percentComplete || 0) : 0;
 
               return (
-                <div key={course.subjectId} className="flex flex-col gap-4">
+                <div key={course.id} className="flex flex-col gap-4">
                   {/* Certificate Card */}
                   <div className="relative bg-[#161820] border border-white/[0.08] rounded-xl overflow-hidden aspect-[1.414/1] flex flex-col items-center justify-center text-center p-8">
                     
@@ -114,7 +115,7 @@ export default function CertificatesPage() {
                       <h2 className="text-[#7F77DD] font-bold text-xl tracking-widest uppercase mb-2">Certificate of Completion</h2>
                       <h3 className="text-white font-bold text-3xl mb-6">{course.title}</h3>
                       <p className="text-white/50 text-sm mb-2">Awarded to</p>
-                      <p className="text-white font-bold text-2xl mb-8 border-b border-white/20 pb-2 px-8 inline-block">{user?.name}</p>
+                      <p className="text-white font-bold text-2xl mb-8 border-b border-white/20 pb-2 px-8 inline-block">{user?.name || 'Student Name'}</p>
                       
                       <div className="flex w-full justify-between items-end mt-auto pt-8 border-t border-white/10 text-left">
                         <div>
@@ -144,10 +145,10 @@ export default function CertificatesPage() {
                         <div className="w-full max-w-md">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-medium text-white/60">Progress</span>
-                            <span className="text-sm font-bold text-[#7F77DD]">{Math.round(course.percentComplete || 0)}% complete</span>
+                            <span className="text-sm font-bold text-[#7F77DD]">{progress}% complete</span>
                           </div>
                           <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-[#7F77DD] rounded-full" style={{ width: `${course.percentComplete || 0}%` }}></div>
+                            <div className="h-full bg-[#7F77DD] rounded-full" style={{ width: `${progress}%` }}></div>
                           </div>
                         </div>
                       </div>
@@ -158,7 +159,7 @@ export default function CertificatesPage() {
                   {isUnlocked && (
                     <div className="flex items-center gap-3">
                       <button 
-                        onClick={() => handleDownload(course.subjectId)}
+                        onClick={() => handleDownload(course.id)}
                         className="flex-1 py-3 bg-[#7F77DD] text-white text-sm font-bold rounded-lg hover:bg-[#6c65bd] transition-colors flex items-center justify-center gap-2 shadow-lg"
                       >
                         <Download className="w-4 h-4" /> Download PDF
